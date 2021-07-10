@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+flask-jwt-extended = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+python-dotenv = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
+
+[scripts]
+setup = "export FLASK_APP=src/app.py"  # mac o linux
+#setup_app_flask = "SET FLASK_APP=src/app.py"  # windows
+init = "flask db init" # crea la carpeta migrations
+migrate = "flask db migrate" # transforma todos los modelos del archivo models.py en migraciones
+upgrade = "flask db upgrade" # ejecuta todas las migraciones sobre la base de datos
+downgrade = "flask db downgrade" # regresa la base de datos a un estado anterior
+start = "python src/app.py"
