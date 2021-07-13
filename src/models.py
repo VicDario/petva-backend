@@ -48,9 +48,9 @@ class Pet(db.Model):
     specie = db.Column(db.Enum(Specie), nullable=False)
     picture = db.Column(db.Text)
     birth_date = db.Column(db.Date)
-    history = db.Relationship('History', cascade='all, delete', backref='Pet')
-    id_owner = db.Column(db.Integer, db.ForeignKey('user.id'), ondelete='CASCADE', nullable=True)
-    id_fundation  = db.Column(db.Integer, db.ForeignKey('fundation.id'), ondelete='CASCADE', nullable=True)
+    history = db.relationship('History', cascade='all, delete', backref='Pet')
+    id_owner = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
+    id_fundation  = db.Column(db.Integer, db.ForeignKey('fundation.id', ondelete='CASCADE'), nullable=True)
 
     def serialize(self):
         return {
@@ -78,7 +78,7 @@ class Pet(db.Model):
 class History(db.Model):
     __tablename__ = 'Histories'
     id = db.Column(db.Integer, primary_key=True)
-    id_pet = db.Column(db.Integer, db.ForeignKey('pet.id'), ondelete='CASCADE')
+    id_pet = db.Column(db.Integer, db.ForeignKey('pet.id', ondelete='CASCADE'))
     vaccines = db.relationship('Vaccine', cascade='all, delete', backref='History')
     diagnostics = db.relationship('Diagnostic', cascade='all, delete', backref='History')
     surgeries = db.relationship('Surgery', cascade='all, delete', backref='History')
@@ -104,8 +104,8 @@ class History(db.Model):
 class Vaccine(db.Model):
     __tablename__ = 'Vaccines'
     id = db.Column(db.Integer, primary_key=True)
-    id_history = db.Column(db.Integer, db.ForeignKey('history.id'), ondelete='CASCADE')
-    lot = db.Column(db.text, nullable=False)
+    id_history = db.Column(db.Integer, db.ForeignKey('history.id', ondelete='CASCADE'))
+    lot = db.Column(db.Text, nullable=False)
     date = db.Column(db.Date)
     laboratory = db.Column(db.String(50), nullable=False)
     name = db.Column(db.String(50), nullable=False)
@@ -133,7 +133,7 @@ class Vaccine(db.Model):
 class Diagnostic(db.Model):
     __tablename__ = 'diagnostics'
     id = db.Column(db.Integer, primary_key=True)
-    id_history = db.Column(db.Integer, db.ForeignKey('history.id'), ondelete='CASCADE')
+    id_history = db.Column(db.Integer, db.ForeignKey('history.id', ondelete='CASCADE'))
     diagnostic = db.Column(db.Text, nullable=False)
     date = db.Column(db.Date, nullable=False)
     doctor_name = db.Column(db.String(100))
@@ -160,7 +160,7 @@ class Diagnostic(db.Model):
 class Surgery(db.Model):
     __tablename__ = 'surgeries'
     id = db.Column(db.Integer, primary_key=True)
-    id_history = db.Column(db.Integer, db.ForeignKey('history.id'), ondelete='CASCADE')
+    id_history = db.Column(db.Integer, db.ForeignKey('history.id', ondelete='CASCADE'))
     description = db.Column(db.Text, nullable=False)
     doctor_name = db.Column(db.String(100))
     date = db.Column(db.Date)
@@ -191,7 +191,7 @@ class Clinic(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
-    doctors = db.Relationship('Doctor', cascade='all, delete', backref='Clinic')
+    doctors = db.relationship('Doctor', cascade='all, delete', backref='Clinic')
     picture = db.Column(db.Text)
     
     def serialize(self):
@@ -220,7 +220,7 @@ class Clinic(db.Model):
 class Doctor(db.Model):
     __tablename__ = 'doctors'
     id = db.Column(db.Integer, primary_key=True)
-    id_clinic = db.Column(db.Integer, db.ForeignKey('clinic.id'), ondelete='CASCADE')
+    id_clinic = db.Column(db.Integer, db.ForeignKey('clinic.id', ondelete='CASCADE'))
     name = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
