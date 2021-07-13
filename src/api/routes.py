@@ -29,7 +29,7 @@ def login_user():
     password = request.json.get("password", None)
     user = User.query.filter_by(email=email).first()        
     if user is not None and check_password_hash(user.password, password):
-        access_token = create_access_token(identity=email, expires=timedelta(hours=23))
+        access_token = create_access_token(identity=email, expires_delta_delta=timedelta(hours=1))
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
@@ -53,7 +53,7 @@ def login_clinic():
     password = request.json.get("password", None)
     clinic = Clinic.query.filter_by(email=email).first()        
     if clinic is not None and check_password_hash(clinic.password, password):
-        access_token = create_access_token(identity=email, expires=timedelta(hours=23))
+        access_token = create_access_token(identity=email, expires_delta=timedelta(hours=23))
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
@@ -78,7 +78,7 @@ def login_doctor():
     password = request.json.get("password", None)
     doctor = Doctor.query.filter_by(email=email).first()        
     if doctor is not None and check_password_hash(doctor.password, password):
-        access_token = create_access_token(identity=email, expires=timedelta(hours=23))
+        access_token = create_access_token(identity=email, expires_delta=timedelta(hours=23))
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
@@ -102,7 +102,7 @@ def login_fundation():
     password = request.json.get("password", None)
     fundation = Doctor.query.filter_by(email=email).first()        
     if fundation is not None and check_password_hash(fundation.password, password):
-        access_token = create_access_token(identity=email, expires=timedelta(hours=23))
+        access_token = create_access_token(identity=email, expires_delta=timedelta(hours=23))
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
