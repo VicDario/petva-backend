@@ -5,7 +5,7 @@ from .models import db, User
 from flask_admin.contrib.sqla import ModelView
 
 def setup_admin(app):
-    app.secret_key = os.environ.get('SECRET_KEY', 'sample key')
+    app.secret_key = os.environ.get('SECRET_KEY')
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
     admin = Admin(app, name='Admin', template_mode='bootstrap3')
 

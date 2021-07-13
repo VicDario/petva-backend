@@ -1,5 +1,4 @@
 .env
-/migrations
 src/database.db
 
 *.log
@@ -8,3 +7,5 @@ src/database.db
 *.db
 
 __pycache__/
+
+/app/
