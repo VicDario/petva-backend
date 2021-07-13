@@ -9,6 +9,7 @@ flask-jwt-extended = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 python-dotenv = "*"
+gunicorn = "*"
 
 [dev-packages]
 

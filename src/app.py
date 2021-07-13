@@ -7,8 +7,8 @@ from models import db, User, Clinic, Doctor, Fundation, Pet
 from dotenv import dotenv_values
 
 app = Flask(__name__)
-app.config['DEBUG'] = True
-app.config['ENV'] = bool(dotenv_values(".env")["DEVELOPMENT"])
+app.config['DEBUG'] = bool(dotenv_values(".env")["DEBUG"])
+app.config['ENV'] = dotenv_values(".env")["DEVELOPMENT"]
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config["JWT_SECRET_KEY"] = dotenv_values(".env")["SECRET_KEY"]
@@ -116,7 +116,3 @@ def login_fundation():
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
-
-
-if __name__ == '__main__':
-    app.run()
