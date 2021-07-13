@@ -90,8 +90,8 @@ def register_fundation():
     fundation = Fundation()
     fundation.email = request.json.get('email')
     fundation.name = request.json.get('name')
-    fundation.lastname = request.json.get('lastname')
-    fundation.specialty = request.json.get('specialty')
+    fundation.address = request.json.get('address')
+    fundation.phone = request.json.get('phone')
     fundation.password = generate_password_hash(request.json.get('password'))
 
     fundation.save()
@@ -102,7 +102,7 @@ def register_fundation():
 def login_fundation():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-    fundation = Doctor.query.filter_by(email=email).first()        
+    fundation = Fundation.query.filter_by(email=email).first()        
     if fundation is not None and check_password_hash(fundation.password, password):
         access_token = create_access_token(identity=email, expires_delta=timedelta(hours=sessiontime))
         return jsonify(access_token=access_token), 201
