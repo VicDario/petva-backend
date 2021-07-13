@@ -254,6 +254,7 @@ class Fundation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    address = db.Column(db.Text, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     picture = db.Column(db.Text)
@@ -265,6 +266,7 @@ class Fundation(db.Model):
             'name': self.name,
             'email': self.email,
             'phone': self.phone,
+            'address': self.address,
             'picture': self.picture
         }
     def serialize_pets(self):
