@@ -13,8 +13,9 @@ gunicorn = "*"
 flask-admin = "*"
 cloudinary = "*"
 flask-swagger = "*"
-psycopg2-binary = "*"
 flask-cors = "*"
+flask-script = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
@@ -22,7 +23,7 @@ flask-cors = "*"
 python_version = "3.9"
 
 [scripts]
-start="flask run -p 3001 -h 0.0.0.0"
+start="flask run -p 5001 -h 0.0.0.0"
 init="flask db init"
 migrate="flask db migrate"
 local="heroku local"
