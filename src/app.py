@@ -1,4 +1,5 @@
 import os
+import re
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
@@ -16,10 +17,10 @@ app.url_map.strict_slashes = False
 
 # database configuration
 if os.getenv("DATABASE_URL") is not None:
-    uri = os.getenv("DATABASE_URL")  # or other relevant config var
+    uri = os.getenv("DATABASE_URL")
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = uri
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
 

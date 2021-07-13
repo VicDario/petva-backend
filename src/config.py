@@ -1,4 +1,5 @@
 import os
+import re
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
@@ -6,7 +7,10 @@ class Config(object):
     TESTING = False
     CSRF_ENABLED = True
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    uri = os.getenv("DATABASE_URL")
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI = uri
 
 
 class ProductionConfig(Config):
