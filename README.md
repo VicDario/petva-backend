@@ -8,7 +8,7 @@
 ## API endpoints
 - `[GET] /` is a Test endpoint
 ### User 
-- `[POST] /user/register` Register an user in the database.
+- `[POST] /api/user/register` Register an user in the database.
 
     JSON body must have this data to register an user:
       
@@ -18,7 +18,7 @@
           "lastname":"some lastname",
           "password": "some password"
       }
-- `[POST] /user/login` Log in a user.
+- `[POST] /api/user/login` Log in a user.
 
     JSON body must have this data:
 
@@ -27,7 +27,7 @@
           "password": "some password"
       }
 ### Clinic
-- `[POST] /clinic/register` Register a clinic in the database.
+- `[POST] /api/clinic/register` Register a clinic in the database.
 
     JSON body must have this data to register a clinic:
 
@@ -38,7 +38,7 @@
           "phone": "some phone",
           "password": "some password"
       }
-- `[POST] /clinic/login` Log in a clinic.
+- `[POST] /api/clinic/login` Log in a clinic.
 
     JSON body must have this data:
 
@@ -47,7 +47,7 @@
           "password": "some password"
       }
 ### Doctors
-- `[POST] /doctor/register` Register a doctor in the database.
+- `[POST] /api/doctor/register` Register a doctor in the database.
     JSON body must have this data to register a doctor:
 
       {
@@ -57,7 +57,7 @@
           "speciality": "some speciality"
           "password": "some password"
       }
-- `[POST] /doctor/login` Log in a doctor.
+- `[POST] /api/doctor/login` Log in a doctor.
 
     JSON body must have this data :
 
@@ -66,7 +66,7 @@
           "password": "some password"
       }
 ### Fundations
-- `[POST] /fundation/register` Register a doctor in the database.
+- `[POST] /api/fundation/register` Register a doctor in the database.
 
     JSON body must have this data to register:
        
@@ -77,7 +77,7 @@
             "speciality": "some speciality",
             "password": "some password"
         }
-- `[POST] /fundation/login` Log in a fundation.
+- `[POST] /api/fundation/login` Log in a fundation.
 
     JSON body must have this data:
 
