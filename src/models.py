@@ -189,6 +189,7 @@ class Clinic(db.Model):
     name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.Text, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
     doctors = db.Relationship('Doctor', cascade='all, delete', backref='Clinic')
     picture = db.Column(db.Text)
