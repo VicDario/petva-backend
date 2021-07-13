@@ -1,11 +1,12 @@
-from flask_migrate import history
 from flask_sqlalchemy import SQLAlchemy
 import enum
+
 db = SQLAlchemy()
 
 class Specie(enum.Enum): #We can add more species, I'm testing this it´s not definitive
     cat = 'Cat'
     dog = 'Dog'
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)

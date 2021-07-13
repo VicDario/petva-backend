@@ -1,3 +1,10 @@
 .env
 /migrations
 src/database.db
+
+*.log
+*.sql
+*.sqlite
+*.db
+
+__pycache__/

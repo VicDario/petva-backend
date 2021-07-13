@@ -10,6 +10,11 @@ flask-sqlalchemy = "*"
 flask-migrate = "*"
 python-dotenv = "*"
 gunicorn = "*"
+flask-admin = "*"
+cloudinary = "*"
+flask-swagger = "*"
+psycopg2-binary = "*"
+flask-cors = "*"
 
 [dev-packages]
 
@@ -17,10 +22,9 @@ gunicorn = "*"
 python_version = "3.9"
 
 [scripts]
-setup = "export FLASK_APP=src/app.py"  # mac o linux
-#setup_app_flask = "SET FLASK_APP=src/app.py"  # windows
-init = "flask db init" # crea la carpeta migrations
-migrate = "flask db migrate" # transforma todos los modelos del archivo models.py en migraciones
-upgrade = "flask db upgrade" # ejecuta todas las migraciones sobre la base de datos
-downgrade = "flask db downgrade" # regresa la base de datos a un estado anterior
-start = "python src/app.py"
+start="flask run -p 3001 -h 0.0.0.0"
+init="flask db init"
+migrate="flask db migrate"
+local="heroku local"
+upgrade="flask db upgrade"
+reset_db="bash ./docs/assets/reset_migrations.bash"
