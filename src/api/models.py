@@ -102,6 +102,8 @@ class Vaccine(db.Model):
 
     def serialize(self):
         return {
+            'id': self.id,
+            'id_history': self.id_history,
             'name': self.name,
             'lot': self.lot,
             'laboratory': self.laboratory,
@@ -119,6 +121,7 @@ class Diagnostic(db.Model):
     def serialize(self):
         return {
             'id': self.id,
+            'id_history': self.id_history,
             'diagnostic': self.diagnostic,
             'doctor_name': self.doctor_name,
             'date': self.date
@@ -135,6 +138,7 @@ class Surgery(db.Model):
     def serialize(self):
         return {
             'id': self.id,
+            'id_history': self.id_history,
             'description': self.description,
             'doctor_name': self.doctor_name,
             'date': self.date
