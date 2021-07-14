@@ -7,7 +7,7 @@ from datetime import timedelta, datetime
 
 api = Blueprint('api', __name__)
 
-sessiontime = 1
+sessiontime = timedelta(hours=1)
 
 @api.route('/', methods=['GET'])
 def main():
@@ -37,7 +37,7 @@ def login_user():
     password = request.json.get("password", None)
     user = User.query.filter_by(email=email).first()        
     if user is not None and check_password_hash(user.password, password):
-        access_token = create_access_token(identity=email, expires_delta=timedelta(hours=sessiontime))
+        access_token = create_access_token(identity=email, expires_delta=sessiontime)
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
@@ -89,7 +89,7 @@ def add_pet():
     
     return jsonify(Success='Pet added'), 201
 
-#Clinic Routes
+
 
 @api.route('/user/pet/<int:pet_id>/history', methods=['GET'])
 @jwt_required()
@@ -104,6 +104,7 @@ def get_history_pet(pet_id):
     
     return jsonify(History=pet.serialize_history()), 200
 
+#Clinic Routes
 @api.route('/clinic/register', methods=['POST'])
 def register_clinic():
     clinic = Clinic()
@@ -124,7 +125,7 @@ def login_clinic():
     password = request.json.get("password", None)
     clinic = Clinic.query.filter_by(email=email).first()        
     if clinic is not None and check_password_hash(clinic.password, password):
-        access_token = create_access_token(identity=email, expires_delta=timedelta(hours=sessiontime))
+        access_token = create_access_token(identity=email, expires_delta=sessiontime)
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
@@ -152,7 +153,7 @@ def login_doctor():
     password = request.json.get("password", None)
     doctor = Doctor.query.filter_by(email=email).first()        
     if doctor is not None and check_password_hash(doctor.password, password):
-        access_token = create_access_token(identity=email, expires_delta=timedelta(hours=sessiontime))
+        access_token = create_access_token(identity=email, expires_delta=sessiontime)
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
@@ -179,7 +180,7 @@ def login_fundation():
     password = request.json.get("password", None)
     fundation = Fundation.query.filter_by(email=email).first()        
     if fundation is not None and check_password_hash(fundation.password, password):
-        access_token = create_access_token(identity=email, expires_delta=timedelta(hours=sessiontime))
+        access_token = create_access_token(identity=email, expires_delta=sessiontime)
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
