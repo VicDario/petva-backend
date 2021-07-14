@@ -1,5 +1,5 @@
 from flask import request, jsonify, url_for, Blueprint
-from api.models import History, db, User, Pet, Clinic, Doctor, Fundation, Specie, Pet_state
+from api.models import Diagnostic, History, Surgery, Vaccine, db, User, Pet, Clinic, Doctor, Fundation, Specie, Pet_state
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -81,22 +81,18 @@ def add_pet():
     if request.json.get("specie") == 'dog':
         pet.specie = Specie.dog
 
-    history = History()
-    pet.history = history
+    pet.history = History()
 
     db.session.add(pet)
     db.session.commit()
     
     return jsonify(Success='Pet added'), 201
 
-
-
 @api.route('/user/pet/<int:pet_id>/history', methods=['GET'])
 @jwt_required()
 def get_history_pet(pet_id):
     current_user = get_jwt_identity()
     user = User.query.filter_by(email=current_user).one_or_none()
-
     pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
 
     if pet is None:
@@ -104,7 +100,81 @@ def get_history_pet(pet_id):
     
     return jsonify(History=pet.serialize_history()), 200
 
+@api.route('/user/pet/<int:pet_id>/history/vaccine/add', methods=['POST'])
+@jwt_required()
+def add_vaccine_user_to_pet(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).one_or_none()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).one_or_none()
+
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+
+    history = History.query.filter_by(id_pet=pet.id).first()
+    
+    vaccine = Vaccine()
+    date = request.json.get("date")
+    vaccine.date = datetime.strptime(date, "%d/%m/%Y")
+    vaccine.lot = request.json.get("lot")
+    vaccine.name = request.json.get("name")
+    vaccine.laboratory = request.json.get("laboratory")
+    vaccine.id_history = history.id
+
+    db.session.add(vaccine)
+    db.session.commit()
+
+    return jsonify(Success="Vaccine added in history pet id: {}".format(pet.id)), 200
+
+@api.route('/user/pet/<int:pet_id>/history/diagnostic/add', methods=['POST'])
+@jwt_required()
+def add_diagnostic_user_to_pet(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).one_or_none()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).one_or_none()
+
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+
+    history = History.query.filter_by(id_pet=pet.id).first()
+    
+    diagnostic = Diagnostic()
+    date = request.json.get("date")
+    diagnostic.date = datetime.strptime(date, "%d/%m/%Y")
+    diagnostic.diagnostic = request.json.get("diagnostic")
+    diagnostic.doctor_name = request.json.get("doctor_name")
+    diagnostic.id_history = history.id
+
+    db.session.add(diagnostic)
+    db.session.commit()
+
+    return jsonify(Success="Diagnostic added in history pet id: {}".format(pet.id)), 200
+
+@api.route('/user/pet/<int:pet_id>/history/surgery/add', methods=['POST'])
+@jwt_required()
+def add_surgery_user_to_pet(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).one_or_none()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).one_or_none()
+
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+
+    history = History.query.filter_by(id_pet=pet.id).first()
+    
+    surgery = Surgery()
+    date = request.json.get("date")
+    surgery.date = datetime.strptime(date, "%d/%m/%Y")
+    surgery.description = request.json.get("description")
+    surgery.doctor_name = request.json.get("doctor_name")
+    surgery.id_history = history.id
+
+    db.session.add(surgery)
+    db.session.commit()
+
+    return jsonify(Success="Surgery added in history pet id: {}".format(pet.id)), 200
+
 #Clinic Routes
+
 @api.route('/clinic/register', methods=['POST'])
 def register_clinic():
     clinic = Clinic()
