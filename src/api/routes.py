@@ -1,5 +1,5 @@
 from flask import request, jsonify, url_for, Blueprint
-from api.models import db, User, Pet, Clinic, Doctor, Fundation, Specie, Pet_state
+from api.models import History, db, User, Pet, Clinic, Doctor, Fundation, Specie, Pet_state
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -26,7 +26,8 @@ def register_user():
     user.lastname = request.json.get('lastname')
     user.password = generate_password_hash(request.json.get('password'))
 
-    user.save()
+    db.session.add(user)
+    db.session.commit()
 
     return jsonify(Success='User created'), 201
 
@@ -62,28 +63,46 @@ def pets_user():
 def add_pet():
     current_user = get_jwt_identity()
     user = User.query.filter_by(email=current_user).one_or_none()
-
+    fundation = Fundation.query.filter_by(name="Null").one_or_none()
     pet = Pet()
     pet.name = request.json.get("name")
     pet.id_owner = user.id
     pet.code_chip = request.json.get("code_chip", None)
     pet.breed = request.json.get("breed", None)
-    pet.id_fundation = None
+    pet.id_fundation = fundation.id
     pet.state = Pet_state.owned
     pet.picture = request.json.get("picture", None)
-    birth = request.json.get("birth_date", None)
+    birth = request.json.get("birth_date", None) # DD/MM/YYYY
     if birth is not None:
-        birth = datetime.strptime(birth, "%d/%m/%Y")
+        birth = datetime.strptime(birth, "%d/%m/%Y") 
     pet.birth_date = birth
     if request.json.get("specie") == 'cat':
         pet.specie = Specie.cat
     if request.json.get("specie") == 'dog':
         pet.specie = Specie.dog
 
-    pet.save()
+    history = History()
+    pet.history = history
+
+    db.session.add(pet)
+    db.session.commit()
+    
     return jsonify(Success='Pet added'), 201
 
 #Clinic Routes
+
+@api.route('/user/pet/<int:pet_id>/history', methods=['GET'])
+@jwt_required()
+def get_history_pet(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).one_or_none()
+
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
+
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+    
+    return jsonify(History=pet.serialize_history()), 200
 
 @api.route('/clinic/register', methods=['POST'])
 def register_clinic():
@@ -94,7 +113,8 @@ def register_clinic():
     clinic.phone = request.json.get('phone')
     clinic.password = generate_password_hash(request.json.get('password'))
 
-    clinic.save()
+    db.session.add(clinic)
+    db.session.commit()
 
     return jsonify(Success='Clinic created'), 201
 
@@ -121,9 +141,10 @@ def register_doctor():
     doctor.specialty = request.json.get('specialty')
     doctor.password = generate_password_hash(request.json.get('password'))
 
-    doctor.save()
+    db.session.add(doctor)
+    db.session.commit()
 
-    return jsonify(Success='Clinic created'), 201
+    return jsonify(Success='Doctor created'), 201
 
 @api.route('/doctor/login', methods=['POST'])
 def login_doctor():
@@ -147,9 +168,10 @@ def register_fundation():
     fundation.phone = request.json.get('phone')
     fundation.password = generate_password_hash(request.json.get('password'))
 
-    fundation.save()
+    db.session.add(fundation)
+    db.session.commit()
 
-    return jsonify(Success='Clinic created'), 201
+    return jsonify(Success='Fundation created'), 201
 
 @api.route('/fundation/login', methods=['POST'])
 def login_fundation():
