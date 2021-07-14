@@ -4,8 +4,7 @@ from enum import Enum
 db = SQLAlchemy()
 
 Specie = Enum('Specie', 'cat dog')
-
-Pet_state = Enum('Pet_State', 'in_adoption with_owner')
+Pet_state = Enum('Pet_State', 'adoption owned')
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -51,6 +50,8 @@ class Pet(db.Model):
     specie = db.Column(db.Enum(Specie), nullable=False)
     picture = db.Column(db.Text)
     birth_date = db.Column(db.Date)
+    breed = db.Column(db.String(30))
+    state = db.Column(db.Enum(Pet_state), nullable=False)
     history = db.relationship('History', cascade='all, delete', backref='Pet')
     id_owner = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     id_fundation  = db.Column(db.Integer, db.ForeignKey('fundations.id', ondelete='CASCADE'), nullable=True)
@@ -60,6 +61,11 @@ class Pet(db.Model):
             specie = 'cat'
         if self.specie == Specie.dog:
             specie = 'dog'
+
+        if self.state == Pet_state.adoption:
+            state = 'adoption'
+        if self.state == Pet_state.owned:
+            state = 'owned'
         return {
             'id': self.id,
             'id_owner': self.id_owner,
@@ -68,6 +74,7 @@ class Pet(db.Model):
             'code_chip': self.code_chip,
             'birth_date': self.birth_date,
             'specie': specie,
+            'state': state,
             'picture': self.picture
         }
 

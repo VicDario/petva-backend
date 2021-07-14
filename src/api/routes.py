@@ -19,7 +19,7 @@ def main():
 @api.route('/user/register', methods=['POST'])
 def register_user():
     if User.query.filter_by(email=request.json.get('email')).first() is not None:
-        return jsonify(Error='Email alredy registered'), 409
+        return jsonify(Error='Email already registered'), 409
     user = User()
     user.email = request.json.get('email')
     user.name = request.json.get('name')
@@ -55,7 +55,6 @@ def info_user():
 def pets_user():
     current_user = get_jwt_identity()
     user = User.query.filter_by(email=current_user).one_or_none()
-
     return jsonify(user.serialize_pets())
 
 @api.route('/user/pets/add', methods=['POST'])
@@ -66,18 +65,20 @@ def add_pet():
 
     pet = Pet()
     pet.name = request.json.get("name")
-    pet.code_chip = request.json.get("code_chip")
     pet.id_owner = user.id
+    pet.code_chip = request.json.get("code_chip", None)
+    pet.breed = request.json.get("breed", None)
     pet.id_fundation = None
-    pet.picture = request.json.get("picture")
-    birth = request.json.get("birth_date")
-    birth = datetime.strptime(birth, "%d/%m/%Y")
+    pet.state = Pet_state.owned
+    pet.picture = request.json.get("picture", None)
+    birth = request.json.get("birth_date", None)
+    if birth is not None:
+        birth = datetime.strptime(birth, "%d/%m/%Y")
     pet.birth_date = birth
     if request.json.get("specie") == 'cat':
         pet.specie = Specie.cat
     if request.json.get("specie") == 'dog':
         pet.specie = Specie.dog
-    #TO-DO add state
 
     pet.save()
     return jsonify(Success='Pet added'), 201
