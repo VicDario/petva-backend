@@ -1,9 +1,9 @@
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Pet, Clinic, Doctor, Fundation
+from flask import request, jsonify, url_for, Blueprint
+from api.models import db, User, Pet, Clinic, Doctor, Fundation, Specie, Pet_state
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 api = Blueprint('api', __name__)
 
@@ -13,8 +13,13 @@ sessiontime = 1
 def main():
     return jsonify(Test="Test"), 200
 
+
+#User Routes
+
 @api.route('/user/register', methods=['POST'])
 def register_user():
+    if User.query.filter_by(email=request.json.get('email')).first() is not None:
+        return jsonify(Error='Email alredy registered'), 409
     user = User()
     user.email = request.json.get('email')
     user.name = request.json.get('name')
@@ -35,6 +40,49 @@ def login_user():
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
+
+
+@api.route('/user/info', methods=['GET'])
+@jwt_required()
+def info_user():
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).one_or_none()
+
+    return jsonify(user.serialize())
+
+@api.route('/user/pets', methods=['GET'])
+@jwt_required()
+def pets_user():
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).one_or_none()
+
+    return jsonify(user.serialize_pets())
+
+@api.route('/user/pets/add', methods=['POST'])
+@jwt_required()
+def add_pet():
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).one_or_none()
+
+    pet = Pet()
+    pet.name = request.json.get("name")
+    pet.code_chip = request.json.get("code_chip")
+    pet.id_owner = user.id
+    pet.id_fundation = None
+    pet.picture = request.json.get("picture")
+    birth = request.json.get("birth_date")
+    birth = datetime.strptime(birth, "%d/%m/%Y")
+    pet.birth_date = birth
+    if request.json.get("specie") == 'cat':
+        pet.specie = Specie.cat
+    if request.json.get("specie") == 'dog':
+        pet.specie = Specie.dog
+    #TO-DO add state
+
+    pet.save()
+    return jsonify(Success='Pet added'), 201
+
+#Clinic Routes
 
 @api.route('/clinic/register', methods=['POST'])
 def register_clinic():
@@ -61,6 +109,8 @@ def login_clinic():
         return jsonify({"Error": "Bad username or password"}), 401
 
 
+#Doctor Routes
+
 @api.route('/doctor/register', methods=['POST']) #Incomplete
 def register_doctor():
     doctor = Doctor()
@@ -84,6 +134,8 @@ def login_doctor():
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
+
+#Fundation Routes
 
 @api.route('/fundation/register', methods=['POST'])
 def register_fundation():
