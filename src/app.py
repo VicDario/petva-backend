@@ -1,5 +1,4 @@
 import os
-import re
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
