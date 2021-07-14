@@ -1,11 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
-import enum
+from enum import Enum
 
 db = SQLAlchemy()
 
-class Specie(enum.Enum): #We can add more species, I'm testing this it´s not definitive
-    cat = 'Cat'
-    dog = 'Dog'
+Specie = Enum('Specie', 'cat dog')
+
+Pet_state = Enum('Pet_State', 'in_adoption with_owner')
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -20,9 +20,11 @@ class User(db.Model):
 
     def serialize(self):
         return {
+            'id': self.id,
             'name': self.name,
             'lastname': self.lastname,
             'email': self.email,
+            'phone': self.phone,
             'picture': self.picture
         }
 
@@ -54,14 +56,18 @@ class Pet(db.Model):
     id_fundation  = db.Column(db.Integer, db.ForeignKey('fundations.id', ondelete='CASCADE'), nullable=True)
 
     def serialize(self):
+        if self.specie == Specie.cat:
+            specie = 'cat'
+        if self.specie == Specie.dog:
+            specie = 'dog'
         return {
             'id': self.id,
             'id_owner': self.id_owner,
             'id_fundation': self.id_owner,
             'name': self.name,
             'code_chip': self.code_chip,
-            'specie': self.specie,
-            'date': self.birth_date,
+            'birth_date': self.birth_date,
+            'specie': specie,
             'picture': self.picture
         }
 
