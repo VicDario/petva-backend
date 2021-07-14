@@ -30,17 +30,6 @@ class User(db.Model):
     def serialize_pets(self):
         return list(map(lambda pet: pet.serialize(), self.pets))
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
 
 class Pet(db.Model):
     __tablename__ = 'pets'
@@ -52,7 +41,7 @@ class Pet(db.Model):
     birth_date = db.Column(db.Date)
     breed = db.Column(db.String(30))
     state = db.Column(db.Enum(Pet_state), nullable=False)
-    history = db.relationship('History', cascade='all, delete', backref='Pet')
+    history = db.relationship('History', cascade='all, delete', backref='Pet', uselist=False)
     id_owner = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     id_fundation  = db.Column(db.Integer, db.ForeignKey('fundations.id', ondelete='CASCADE'), nullable=True)
 
@@ -78,16 +67,14 @@ class Pet(db.Model):
             'picture': self.picture
         }
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+    def serialize_history(self):
+        return {
+            'id': self.history.id,
+            'id_pet': self.history.id_pet,
+            'vaccines': self.history.serialize_vaccines(),
+            'diagnostics': self.history.serialize_diagnostics(),
+            'surgeries': self.history.serialize_surgeries()
+        }
 
 class History(db.Model):
     __tablename__ = 'histories'
@@ -101,22 +88,11 @@ class History(db.Model):
         return list(map(lambda vaccine: vaccine.serialize(), self.vaccines))
     def serialize_diagnostics(self):
         return list(map(lambda diagnostic: diagnostic.serialize(), self.diagnostics))
-    def serialize_vaccines(self):
+    def serialize_surgeries(self):
         return list(map(lambda surgery: surgery.serialize(), self.surgeries))
-    
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 
 class Vaccine(db.Model):
-    __tablename__ = 'Vaccines'
+    __tablename__ = 'vaccines'
     id = db.Column(db.Integer, primary_key=True)
     id_history = db.Column(db.Integer, db.ForeignKey('histories.id', ondelete='CASCADE'))
     lot = db.Column(db.Text, nullable=False)
@@ -131,18 +107,6 @@ class Vaccine(db.Model):
             'laboratory': self.laboratory,
             'date': self.date
         }
-    
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
 
 class Diagnostic(db.Model):
     __tablename__ = 'diagnostics'
@@ -159,17 +123,6 @@ class Diagnostic(db.Model):
             'doctor_name': self.doctor_name,
             'date': self.date
         }
-    
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 
 class Surgery(db.Model):
     __tablename__ = 'surgeries'
@@ -187,16 +140,6 @@ class Surgery(db.Model):
             'date': self.date
         }
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 class Clinic(db.Model):
     __tablename__ = 'clinics'
     id = db.Column(db.Integer, primary_key=True)
@@ -219,17 +162,6 @@ class Clinic(db.Model):
     
     def serialize_doctors(self):
         return list(map(lambda doctor: doctor.serialize(), self.doctors))
-    
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 
 class Doctor(db.Model):
     __tablename__ = 'doctors'
@@ -250,17 +182,6 @@ class Doctor(db.Model):
             'lastname': self.lastname,
             'specialty': self.specialty
         }
-    
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 
 class Fundation(db.Model):
     __tablename__ = 'fundations'
@@ -285,13 +206,3 @@ class Fundation(db.Model):
     def serialize_pets(self):
         return list(map(lambda pet: pet.serialize, self.pets))
     
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
