@@ -1,4 +1,5 @@
-from flask import request, jsonify, url_for, Blueprint
+from flask import json, request, jsonify, url_for, Blueprint
+from sqlalchemy.orm import query
 from api.models import Diagnostic, History, Surgery, Vaccine, db, User, Pet, Clinic, Doctor, Fundation, Specie, Pet_state
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -47,7 +48,7 @@ def login_user():
 @jwt_required()
 def info_user():
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
+    user = User.query.filter_by(email=current_user).first()
 
     return jsonify(user.serialize())
 
@@ -55,15 +56,29 @@ def info_user():
 @jwt_required()
 def pets_user():
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
+    user = User.query.filter_by(email=current_user).first()
+    if user is None:
+        return jsonify(Error="User not found"), 404
     return jsonify(user.serialize_pets())
+
+@api.route('/user/pets/<int:pet_id>', methods=['GET'])
+@jwt_required()
+def pet_user(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    if user is None:
+        return jsonify(Error="User not found"), 404
+    pet = user.pets.filter_by(id_owner=user.id, id=pet_id).first()
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+    return jsonify(pet.serialize())
 
 @api.route('/user/pets/add', methods=['POST'])
 @jwt_required()
-def add_pet():
+def add_pet_to_user():
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
-    fundation = Fundation.query.filter_by(name="Null").one_or_none()
+    user = User.query.filter_by(email=current_user).first()
+    fundation = Fundation.query.filter_by(name="Null").first()
     pet = Pet()
     pet.name = request.json.get("name")
     pet.id_owner = user.id
@@ -92,7 +107,7 @@ def add_pet():
 @jwt_required()
 def get_history_pet(pet_id):
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
+    user = User.query.filter_by(email=current_user).first()
     pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
 
     if pet is None:
@@ -104,8 +119,8 @@ def get_history_pet(pet_id):
 @jwt_required()
 def add_vaccine_user_to_pet(pet_id):
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
-    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).one_or_none()
+    user = User.query.filter_by(email=current_user).first()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
 
     if pet is None:
         return jsonify(Error="Pet not found"), 404
@@ -129,8 +144,8 @@ def add_vaccine_user_to_pet(pet_id):
 @jwt_required()
 def add_diagnostic_user_to_pet(pet_id):
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
-    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).one_or_none()
+    user = User.query.filter_by(email=current_user).first()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
 
     if pet is None:
         return jsonify(Error="Pet not found"), 404
@@ -153,8 +168,8 @@ def add_diagnostic_user_to_pet(pet_id):
 @jwt_required()
 def add_surgery_user_to_pet(pet_id):
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
-    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).one_or_none()
+    user = User.query.filter_by(email=current_user).first()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
 
     if pet is None:
         return jsonify(Error="Pet not found"), 404
@@ -177,6 +192,8 @@ def add_surgery_user_to_pet(pet_id):
 
 @api.route('/clinic/register', methods=['POST'])
 def register_clinic():
+    if Clinic.query.filter_by(email=request.json.get("email")).first() is not None:
+        return jsonify(Error="Clinic already registered"), 409
     clinic = Clinic()
     clinic.email = request.json.get('email')
     clinic.name = request.json.get('name')
@@ -205,6 +222,8 @@ def login_clinic():
 
 @api.route('/doctor/register', methods=['POST']) #Incomplete
 def register_doctor():
+    if Doctor.query.filter_by(email=request.json.get('email')).first() is not None:
+        return jsonify(Error="Doctor already exists"), 400
     doctor = Doctor()
     doctor.email = request.json.get('email')
     doctor.name = request.json.get('name')
@@ -232,6 +251,8 @@ def login_doctor():
 
 @api.route('/fundation/register', methods=['POST'])
 def register_fundation():
+    if Fundation.query.filter_by(email=request.json.get('email')).first() is not None:
+        return jsonify(Error="Email already registered"), 409
     fundation = Fundation()
     fundation.email = request.json.get('email')
     fundation.name = request.json.get('name')
@@ -254,3 +275,74 @@ def login_fundation():
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
+
+@api.route('/fundation/info', methods=['GET'])
+@jwt_required()
+def info_fundation():
+    current_user = get_jwt_identity()
+    fundation = Fundation.query.filter_by(email=current_user).first()
+
+    return jsonify(fundation.serialize())
+
+@api.route('/fundation/pets/add', methods=['POST'])
+@jwt_required()
+def add_pet_to_fundation():
+    current_user = get_jwt_identity()
+    fundation = Fundation.query.filter_by(email=current_user).first()
+    if fundation is None:
+        return jsonify(Error="Fundation not found"), 404
+    user = User.query.filter_by(name="Null").first()
+    pet = Pet()
+    pet.name = request.json.get("name")
+    pet.id_owner = user.id
+    pet.code_chip = request.json.get("code_chip", None)
+    pet.breed = request.json.get("breed", None)
+    pet.id_fundation = fundation.id
+    pet.state = Pet_state.adoption
+    pet.picture = request.json.get("picture", None)
+    birth = request.json.get("birth_date", None) # DD/MM/YYYY
+    if birth is not None:
+        birth = datetime.strptime(birth, "%d/%m/%Y") 
+    pet.birth_date = birth
+    if request.json.get("specie") == 'cat':
+        pet.specie = Specie.cat
+    if request.json.get("specie") == 'dog':
+        pet.specie = Specie.dog
+
+    pet.history = History()
+
+    db.session.add(pet)
+    db.session.commit()
+    
+    return jsonify(Success='Pet added'), 201
+
+@api.route('/fundation/pets/<int:id>', methods=['GET'])
+@jwt_required()
+def fundation_pet(id):
+    current_user = get_jwt_identity()
+    fundation = Fundation.query.filter_by(email=current_user).first()
+    if fundation is None:
+        return jsonify(Error="Fundation not found"), 404   
+    pet = Pet.query.filter_by(id_fundation=fundation.id, id=id).first()
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+    return jsonify(pet.serialize())
+
+@api.route('/fundation/transfer', methods=['POST'])
+@jwt_required()
+def fundation_transfer_to_user():
+    current_user = get_jwt_identity()
+    fundation = Fundation.query.filter_by(email=current_user).first()
+    if fundation is None:
+        return jsonify(Error="Fundation not found"), 404
+    id_pet = int(request.json.get("id"))
+    user = User.query.filter_by(email=request.json.get("email_user")).first()
+    if user is None:
+        return jsonify(Error="User not found"), 404
+    pet = Pet.query(id=id_pet, id_fundation=user.id).first()
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+    pet.id_owner = user.id
+    pet.state = Pet_state.owned
+    db.session.commit()
+    return jsonify(Success="Pet transfered"), 201
