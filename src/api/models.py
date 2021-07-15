@@ -1,10 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
-from enum import Enum, unique
+from enum import Enum
 
 db = SQLAlchemy()
 
 Specie = Enum('Specie', 'cat dog')
-Pet_state = Enum('Pet_State', 'adoption owned')
+Pet_state = Enum('Pet_State', 'adoption owned missed')
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -58,7 +58,7 @@ class Pet(db.Model):
         return {
             'id': self.id,
             'id_owner': self.id_owner,
-            'id_fundation': self.id_owner,
+            'id_fundation': self.id_fundation,
             'name': self.name,
             'code_chip': self.code_chip,
             'birth_date': self.birth_date,
