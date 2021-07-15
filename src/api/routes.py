@@ -5,6 +5,7 @@ from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta, datetime
+import uuid
 
 api = Blueprint('api', __name__)
 
@@ -82,9 +83,9 @@ def add_pet_to_user():
     pet = Pet()
     pet.name = request.json.get("name")
     pet.id_owner = user.id
+    pet.id_fundation = fundation.id
     pet.code_chip = request.json.get("code_chip", None)
     pet.breed = request.json.get("breed", None)
-    pet.id_fundation = fundation.id
     pet.state = Pet_state.owned
     pet.picture = request.json.get("picture", None)
     birth = request.json.get("birth_date", None) # DD/MM/YYYY
@@ -316,14 +317,23 @@ def add_pet_to_fundation():
     
     return jsonify(Success='Pet added'), 201
 
-@api.route('/fundation/pets/<int:id>', methods=['GET'])
+@api.route('/fundation/pets', methods=['GET'])
 @jwt_required()
-def fundation_pet(id):
+def fundation_pets():
     current_user = get_jwt_identity()
     fundation = Fundation.query.filter_by(email=current_user).first()
     if fundation is None:
         return jsonify(Error="Fundation not found"), 404   
-    pet = Pet.query.filter_by(id_fundation=fundation.id, id=id).first()
+    return jsonify(fundation.serialize_pets())
+
+@api.route('/fundation/pets/<int:pet_id>', methods=['GET'])
+@jwt_required()
+def fundation_pet(pet_id):
+    current_user = get_jwt_identity()
+    fundation = Fundation.query.filter_by(email=current_user).first()
+    if fundation is None:
+        return jsonify(Error="Fundation not found"), 404   
+    pet = Pet.query.filter_by(id_fundation=fundation.id, id=pet_id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
     return jsonify(pet.serialize())
@@ -335,11 +345,11 @@ def fundation_transfer_to_user():
     fundation = Fundation.query.filter_by(email=current_user).first()
     if fundation is None:
         return jsonify(Error="Fundation not found"), 404
-    id_pet = int(request.json.get("id"))
     user = User.query.filter_by(email=request.json.get("email_user")).first()
     if user is None:
         return jsonify(Error="User not found"), 404
-    pet = Pet.query(id=id_pet, id_fundation=user.id).first()
+    id_pet = int(request.json.get("id_pet"))
+    pet = Pet.query(id=id_pet, id_fundation=fundation.id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
     pet.id_owner = user.id
