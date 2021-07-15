@@ -66,7 +66,7 @@
           "password": "some password"
       }
 ### Fundations
-- `[POST] /api/fundation/register` Register a doctor in the database.
+- `[POST] /api/fundation/register` Register a foundation in the database.
 
     JSON body must have this data to register:
        
@@ -74,11 +74,10 @@
             "email": "some email",
             "name": "some name",
             "lastname": "some lastname",
-            "speciality": "some speciality",
             "password": "some password"
         }
-- `[POST] /api/fundation/login` Log in a fundation.
-
+- `[POST] /api/fundation/login` Log in a foundation.
+    Foundation must be logged in
     JSON body must have this data:
 
       {
@@ -86,3 +85,33 @@
           "password": "some password"
       }
 
+- `[GET] /api/fundation/info` Return the foundation's info.
+    Foundation must be logged in
+
+- `[GET] /api/fundation/pets` Return the foundation's pets.
+    Foundation must be logged in
+
+- `[GET] /api/fundation/pets/<int:pet_id>` Return a specific foundation's pet.
+    Foundation must be logged in
+
+- `[POST] /api/fundation/pets/add` Log in a foundation.
+    Foundation must be logged in
+    JSON body must have this data:
+
+      {
+          "name": "A name", -> Required
+          "specie": "cat" || "dog", -> Required
+          "code_chip": "pet's code_chip" -> Optional
+          "breed" : "pet's breed" -> Optional
+          "picture": "pet's picture" -> Optional
+          "birth" : "pet's birth date" -> Optional
+      }
+
+- `[POST] /api/fundation/transfer` Transfer a pet to an user.
+    Foundation must be logged in
+    JSON body must have this data:
+
+    {
+        "email_user": "some email"
+        "id_pet": number -> This id must be from a pet belonging to the foundation
+    }
