@@ -131,7 +131,8 @@
         {
             "email": "some email",
             "name": "some name",
-            "lastname": "some lastname",
+            "address": "some address",
+            "phone": "some number phone",
             "password": "some password"
         }
 - `[POST] /api/fundation/login` Log in a foundation.
