@@ -349,7 +349,7 @@ def fundation_transfer_to_user():
     if user is None:
         return jsonify(Error="User not found"), 404
     id_pet = int(request.json.get("id_pet"))
-    pet = Pet.query(id=id_pet, id_fundation=fundation.id).first()
+    pet = Pet.query.filter_by(id=id_pet, id_fundation=fundation.id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
     pet.id_owner = user.id
