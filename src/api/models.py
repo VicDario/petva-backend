@@ -1,7 +1,5 @@
-from sqlalchemy.dialects.postgresql import UUID
 from flask_sqlalchemy import SQLAlchemy
-from enum import Enum
-import uuid
+from enum import Enum, unique
 
 db = SQLAlchemy()
 
@@ -43,9 +41,9 @@ class Pet(db.Model):
     birth_date = db.Column(db.Date)
     breed = db.Column(db.String(30))
     state = db.Column(db.Enum(Pet_state), nullable=False)
-    history = db.relationship('History', cascade='all, delete', backref='Pet', uselist=False)
     id_owner = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
-    id_fundation  = db.Column(UUID(as_uuid=True), db.ForeignKey('fundations.key', ondelete='CASCADE'))
+    id_fundation  = db.Column(db.Integer, db.ForeignKey('fundations.id', ondelete='CASCADE'))
+    history = db.relationship('History', cascade='all, delete', backref='Pet', uselist=False)
 
     def serialize(self):
         if self.specie == Specie.cat:
@@ -192,7 +190,6 @@ class Doctor(db.Model):
 class Fundation(db.Model):
     __tablename__ = 'fundations'
     id = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.Column(UUID(as_uuid=True), default=uuid.uuid4))
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     address = db.Column(db.Text, nullable=False)
