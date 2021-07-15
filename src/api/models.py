@@ -62,6 +62,7 @@ class Pet(db.Model):
             'name': self.name,
             'code_chip': self.code_chip,
             'birth_date': self.birth_date,
+            'breed': self.breed,
             'specie': specie,
             'state': state,
             'picture': self.picture
