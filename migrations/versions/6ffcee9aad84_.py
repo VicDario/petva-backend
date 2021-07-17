@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 1f0fa4c71dd9
+Revision ID: 6ffcee9aad84
 Revises: 
-Create Date: 2021-07-15 09:15:38.293260
+Create Date: 2021-07-17 15:13:35.195675
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1f0fa4c71dd9'
+revision = '6ffcee9aad84'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,7 +29,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
-    op.create_table('fundations',
+    op.create_table('foundations',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
@@ -72,10 +72,10 @@ def upgrade():
     sa.Column('picture', sa.Text(), nullable=True),
     sa.Column('birth_date', sa.Date(), nullable=True),
     sa.Column('breed', sa.String(length=30), nullable=True),
-    sa.Column('state', sa.Enum('adoption', 'owned', name='pet_state'), nullable=False),
+    sa.Column('state', sa.Enum('adoption', 'owned', 'missed', name='pet_state'), nullable=False),
     sa.Column('id_owner', sa.Integer(), nullable=True),
-    sa.Column('id_fundation', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['id_fundation'], ['fundations.id'], ondelete='CASCADE'),
+    sa.Column('id_foundation', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id_foundation'], ['foundations.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['id_owner'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -125,6 +125,6 @@ def downgrade():
     op.drop_table('pets')
     op.drop_table('doctors')
     op.drop_table('users')
-    op.drop_table('fundations')
+    op.drop_table('foundations')
     op.drop_table('clinics')
     # ### end Alembic commands ###
