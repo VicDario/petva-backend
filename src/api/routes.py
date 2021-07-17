@@ -51,7 +51,7 @@ def info_user():
     current_user = get_jwt_identity()
     user = User.query.filter_by(email=current_user).first()
 
-    return jsonify(user.serialize())
+    return jsonify(user.serialize()), 200
 
 @api.route('/user/pets', methods=['GET'])
 @jwt_required()
@@ -60,7 +60,7 @@ def pets_user():
     user = User.query.filter_by(email=current_user).first()
     if user is None:
         return jsonify(Error="User not found"), 404
-    return jsonify(user.serialize_pets())
+    return jsonify(user.serialize_pets()), 200
 
 @api.route('/user/pets/<int:pet_id>', methods=['GET'])
 @jwt_required()
@@ -69,7 +69,7 @@ def pet_user(pet_id):
     user = User.query.filter_by(email=current_user).first()
     if user is None:
         return jsonify(Error="User not found"), 404
-    pet = user.pets.filter_by(id_owner=user.id, id=pet_id).first()
+    pet = Pet.filter_by(id_owner=user.id, id=pet_id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
     return jsonify(pet.serialize())
@@ -321,7 +321,8 @@ def foundation_pets_in_adoption():
     current_user = get_jwt_identity()
     foundation = Foundation.query.filter_by(email=current_user).first()
     pets = Pet.query.filter_by(id_foundation=foundation.id, state=Pet_state.adoption).all()
-    return jsonify(list(map(lambda pet: pet.serialize, pets)))
+
+    return jsonify(list(map(lambda pet: pet.serialize, pets))), 200
 
 
 @api.route('/foundation/pets/owned', methods=['GET'])
@@ -330,8 +331,8 @@ def foundation_pets_owned():
     current_user = get_jwt_identity()
     foundation = Foundation.query.filter_by(email=current_user).first()
     pets = Pet.query.filter_by(id_foundation=foundation.id, state=Pet_state.owned).all()
-    return jsonify(list(map(lambda pet: pet.serialize, pets)))
 
+    return jsonify(list(map(lambda pet: pet.serialize, pets)))
 
 @api.route('/foundation/pets/<int:pet_id>', methods=['GET'])
 @jwt_required()
@@ -343,7 +344,8 @@ def foundation_pet(pet_id):
     pet = Pet.query.filter_by(id_foundation=foundation.id, id=pet_id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
-    return jsonify(pet.serialize())
+
+    return jsonify(pet.serialize()), 200
 
 @api.route('/foundation/transfer', methods=['POST'])
 @jwt_required()
