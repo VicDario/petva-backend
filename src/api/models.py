@@ -41,8 +41,8 @@ class Pet(db.Model):
     birth_date = db.Column(db.Date)
     breed = db.Column(db.String(30))
     state = db.Column(db.Enum(Pet_state), nullable=False)
-    id_owner = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
-    id_fundation  = db.Column(db.Integer, db.ForeignKey('fundations.id', ondelete='CASCADE'))
+    id_owner = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
+    id_foundation  = db.Column(db.Integer, db.ForeignKey('foundations.id', ondelete='CASCADE'), nullable=True)
     history = db.relationship('History', cascade='all, delete', backref='Pet', uselist=False)
 
     def serialize(self):
@@ -58,7 +58,7 @@ class Pet(db.Model):
         return {
             'id': self.id,
             'id_owner': self.id_owner,
-            'id_fundation': self.id_fundation,
+            'id_foundation': self.id_foundation,
             'name': self.name,
             'code_chip': self.code_chip,
             'birth_date': self.birth_date,
@@ -159,6 +159,7 @@ class Clinic(db.Model):
     def serialize(self):
         return {
             'id': self.id,
+            'name': self.name,
             'address': self.address,
             'email': self.email,
             'phone': self.phone,
@@ -185,11 +186,12 @@ class Doctor(db.Model):
             'id_clinic': self.id_clinic,
             'name': self.name,
             'lastname': self.lastname,
-            'specialty': self.specialty
+            'specialty': self.specialty,
+            'picture' : self.picture
         }
 
-class Fundation(db.Model):
-    __tablename__ = 'fundations'
+class Foundation(db.Model):
+    __tablename__ = 'foundations'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -197,7 +199,7 @@ class Fundation(db.Model):
     password = db.Column(db.String(200), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     picture = db.Column(db.Text)
-    pets = db.relationship('Pet', backref='Fundation')
+    pets = db.relationship('Pet', backref='Foundation')
 
     def serialize(self):
         return {
