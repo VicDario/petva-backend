@@ -366,6 +366,19 @@ def foundation_transfer_pet_to_user():
     db.session.commit()
     return jsonify(Success="Pet {} {} transferred to user {} {}".format(pet.id, pet.name, user.id, user.email)), 201
 
+@api.route('/foundation/pets/<int:pet_id>/history', methods=['GET'])
+@jwt_required()
+def get_history_pet(pet_id):
+    current_user = get_jwt_identity()
+    foundation = Foundation.query.filter_by(email=current_user).first()
+    pet = Pet.query.filter_by(id_fundation=foundation.id, id=pet_id).first()
+
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+    
+    return jsonify(History=pet.serialize_history()), 200
+
+
 @api.route('/foundation/pets/<int:pet_id>/history/vaccine/add', methods=['POST'])
 @jwt_required()
 def add_vaccine_foundation_to_pet(pet_id):
