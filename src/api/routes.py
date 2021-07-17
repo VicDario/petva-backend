@@ -69,7 +69,7 @@ def pet_user(pet_id):
     user = User.query.filter_by(email=current_user).first()
     if user is None:
         return jsonify(Error="User not found"), 404
-    pet = Pet.filter_by(id_owner=user.id, id=pet_id).first()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
     return jsonify(pet.serialize())
@@ -322,7 +322,7 @@ def foundation_pets_in_adoption():
     foundation = Foundation.query.filter_by(email=current_user).first()
     pets = Pet.query.filter_by(id_foundation=foundation.id, state=Pet_state.adoption).all()
 
-    return jsonify(list(map(lambda pet: pet.serialize, pets))), 200
+    return jsonify(list(map(lambda pet: pet.serialize(), pets))), 200
 
 
 @api.route('/foundation/pets/owned', methods=['GET'])
@@ -332,7 +332,7 @@ def foundation_pets_owned():
     foundation = Foundation.query.filter_by(email=current_user).first()
     pets = Pet.query.filter_by(id_foundation=foundation.id, state=Pet_state.owned).all()
 
-    return jsonify(list(map(lambda pet: pet.serialize, pets)))
+    return jsonify(list(map(lambda pet: pet.serialize(), pets)))
 
 @api.route('/foundation/pets/<int:pet_id>', methods=['GET'])
 @jwt_required()
