@@ -105,7 +105,7 @@ def add_pet_to_user():
 
 @api.route('/user/pets/<int:pet_id>/history', methods=['GET'])
 @jwt_required()
-def get_history_pet(pet_id):
+def get_history_pet_user(pet_id):
     current_user = get_jwt_identity()
     user = User.query.filter_by(email=current_user).first()
     pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
@@ -368,7 +368,7 @@ def foundation_transfer_pet_to_user():
 
 @api.route('/foundation/pets/<int:pet_id>/history', methods=['GET'])
 @jwt_required()
-def get_history_pet(pet_id):
+def get_history_pet_fundation(pet_id):
     current_user = get_jwt_identity()
     foundation = Foundation.query.filter_by(email=current_user).first()
     pet = Pet.query.filter_by(id_fundation=foundation.id, id=pet_id).first()
