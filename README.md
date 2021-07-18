@@ -64,6 +64,12 @@
 
         returns:    201 if the pet was added
 
+- `[GET] /api/user/pets/<int:pet_id>/report/lost` Report a pet how lost.
+> User must be logged.
+
+- `[GET] /api/user/pets/<int:pet_id>/report/founded` Report a pet how founded.
+> User must be logged.
+
 ### User Pet History
 - `[GET] /api/user/pets/<int:pet_id>/history` Get the history of a pet.
 > User must be logged.
@@ -291,3 +297,5 @@
                     404 if the pet was not found
 
 - `[GET] '/api/pets/in_adoption'` Gets all pets in adoption with all info necessary.
+
+- `[GET] '/api/pets/lost'` Gets all lost pets with all info necessary.
