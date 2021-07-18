@@ -4,7 +4,7 @@ from enum import Enum
 db = SQLAlchemy()
 
 Specie = Enum('Specie', 'cat dog')
-Pet_state = Enum('Pet_State', 'adoption owned missed')
+Pet_state = Enum('Pet_State', 'adoption owned lost')
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -47,8 +47,8 @@ class Pet(db.Model):
     email = None
     phone = None
     address = None
-    foundation_name = None
-    foundation_picture = db.Column(db.Text)
+    contact_name = None
+    contact_picture = None
 
     def serialize(self):
         if self.specie == Specie.cat:
@@ -60,6 +60,8 @@ class Pet(db.Model):
             state = 'adoption'
         if self.state == Pet_state.owned:
             state = 'owned'
+        if self.state == Pet_state.lost:
+            state = 'lost'
         return {
             'id': self.id,
             'id_owner': self.id_owner,
@@ -77,9 +79,7 @@ class Pet(db.Model):
             specie = 'cat'
         if self.specie == Specie.dog:
             specie = 'dog'
-
         return {
-            'id_foundation': self.id_foundation,
             'name': self.name,
             'specie': specie,
             'birth_date': self.birth_date,
@@ -87,7 +87,8 @@ class Pet(db.Model):
             'email': self.email,
             'phone': self.phone,
             'address': self.address,
-            'foundation_name': self.foundation_name
+            'contact_name': self.contact_name,
+            'contact_picture': self.contact_picture
         }
 
     def serialize_history(self):

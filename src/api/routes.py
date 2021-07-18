@@ -188,6 +188,32 @@ def add_surgery_user_to_pet(pet_id):
 
     return jsonify(Success="Surgery added in history pet id: {}".format(pet.id)), 201
 
+@api.route('/user/pets/<int:pet_id>/report/lost', methods=['GET'])
+@jwt_required()
+def get_report_pet_user(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
+
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+
+    pet.state = Pet_state.lost
+    db.session.commit()
+    return jsonify(Success="Pet {} {} reported".format(pet.id, pet.name)), 200
+
+@api.route('/user/pets/<int:pet_id>/report/founded', methods=['GET'])
+@jwt_required()
+def get_report_pet_user_lost(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+    pet.state = Pet_state.owned
+    db.session.commit()
+    return jsonify(Success="Pet {} {} reported".format(pet.id, pet.name)), 200
+
 #Clinic Routes
 
 @api.route('/clinic/register', methods=['POST'])
@@ -459,8 +485,18 @@ def get_pets_in_adoption():
         foundation = Foundation.query.filter_by(id=pet.id_foundation).first()
         
         pet.email = foundation.email
-        pet.foundation_name = foundation.name
+        pet.contact_name = foundation.name
         pet.phone = foundation.phone
         pet.address = foundation.address
-        pet.foundation_address = foundation.address
+        pet.contact_picture = foundation.picture
+    return jsonify([pet.serialize_info() for pet in pets]), 200
+
+@api.route('pets/lost', methods=['GET'])
+def get_pets_lost():
+    pets = Pet.query.filter_by(state=Pet_state.lost).all()
+    for pet in pets:
+        user = User.query.filter_by(id=pet.id_owner).first()
+        pet.email = user.email
+        pet.contact_name = user.name + " " + user.lastname
+        pet.phone = user.phone
     return jsonify([pet.serialize_info() for pet in pets]), 200
