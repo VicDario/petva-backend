@@ -289,3 +289,5 @@
 
         returns:    201 if the surgery was added
                     404 if the pet was not found
+
+- `[GET] '/api/pets/in_adoption'` Gets all pets in adoption with all info necessary.
