@@ -455,13 +455,12 @@ def add_surgery_foundation_to_pet(pet_id):
 @api.route('pets/in_adoption', methods=['GET'])
 def get_pets_in_adoption():
     pets = Pet.query.filter_by(state=Pet_state.adoption).all()
-    foundations = Foundation.query.all()
     for pet in pets:
-        for foundation in foundations:
-            if pet.id_foundation == foundation.id:
-                pet.email = foundation.email
-                pet.foundation_name = foundation.name
-                pet.phone = foundation.phone
-                pet.address = foundation.address
-                pet.foundation_address = foundation.address
+        foundation = Foundation.query.filter_by(id=pet.id_foundation).first()
+        
+        pet.email = foundation.email
+        pet.foundation_name = foundation.name
+        pet.phone = foundation.phone
+        pet.address = foundation.address
+        pet.foundation_address = foundation.address
     return jsonify([pet.serialize_info() for pet in pets]), 200
