@@ -44,6 +44,11 @@ class Pet(db.Model):
     id_owner = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     id_foundation  = db.Column(db.Integer, db.ForeignKey('foundations.id', ondelete='CASCADE'), nullable=True)
     history = db.relationship('History', cascade='all, delete', backref='Pet', uselist=False)
+    email = None
+    phone = None
+    address = None
+    foundation_name = None
+    foundation_picture = db.Column(db.Text)
 
     def serialize(self):
         if self.specie == Specie.cat:
@@ -66,6 +71,23 @@ class Pet(db.Model):
             'specie': specie,
             'state': state,
             'picture': self.picture
+        }
+    def serialize_info(self):
+        if self.specie == Specie.cat:
+            specie = 'cat'
+        if self.specie == Specie.dog:
+            specie = 'dog'
+
+        return {
+            'id_foundation': self.id_foundation,
+            'name': self.name,
+            'specie': specie,
+            'birth_date': self.birth_date,
+            'picture': self.picture,
+            'email': self.email,
+            'phone': self.phone,
+            'address': self.address,
+            'foundation_name': self.foundation_name
         }
 
     def serialize_history(self):
@@ -212,4 +234,3 @@ class Foundation(db.Model):
         }
     def serialize_pets(self):
         return list(map(lambda pet: pet.serialize(), self.pets))
-    
