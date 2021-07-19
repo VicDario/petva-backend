@@ -188,16 +188,15 @@ def add_surgery_user_to_pet(pet_id):
 
     return jsonify(Success="Surgery added in history pet id: {}".format(pet.id)), 201
 
-@api.route('/user/pets/<int:pet_id>/report/lost', methods=['GET'])
+@api.route('/user/pets/<int:pet_id>/report/lost', methods=['POST'])
 @jwt_required()
 def get_report_pet_user(pet_id):
     current_user = get_jwt_identity()
     user = User.query.filter_by(email=current_user).first()
     pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
-
     if pet is None:
         return jsonify(Error="Pet not found"), 404
-
+    pet.last_location = request.json.get("last_location")
     pet.state = Pet_state.lost
     db.session.commit()
     return jsonify(Success="Pet {} {} reported".format(pet.id, pet.name)), 200
@@ -210,6 +209,7 @@ def get_report_pet_user_lost(pet_id):
     pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
+    pet.last_location = None
     pet.state = Pet_state.owned
     db.session.commit()
     return jsonify(Success="Pet {} {} reported".format(pet.id, pet.name)), 200
@@ -478,25 +478,12 @@ def add_surgery_foundation_to_pet(pet_id):
 
     return jsonify(Success="Surgery added in history pet id: {}".format(pet.id)), 201
 
-@api.route('pets/in_adoption', methods=['GET'])
-def get_pets_in_adoption():
-    pets = Pet.query.filter_by(state=Pet_state.adoption).all()
-    for pet in pets:
-        foundation = Foundation.query.filter_by(id=pet.id_foundation).first()
-        
-        pet.email = foundation.email
-        pet.contact_name = foundation.name
-        pet.phone = foundation.phone
-        pet.address = foundation.address
-        pet.contact_picture = foundation.picture
-    return jsonify([pet.serialize_info() for pet in pets]), 200
+@api.route('pets/in_adoption/<int:page>', methods=['GET'])
+def get_pets_in_adoption(page=1):
+    pets = Pet.query.filter_by(state=Pet_state.adoption).paginate(page=page, per_page=10)
+    return jsonify([pet.serialize_info_for_adoption() for pet in pets.items], pets.pages, pets.has_next, pets.has_prev), 200
 
-@api.route('pets/lost', methods=['GET'])
-def get_pets_lost():
-    pets = Pet.query.filter_by(state=Pet_state.lost).all()
-    for pet in pets:
-        user = User.query.filter_by(id=pet.id_owner).first()
-        pet.email = user.email
-        pet.contact_name = user.name + " " + user.lastname
-        pet.phone = user.phone
-    return jsonify([pet.serialize_info() for pet in pets]), 200
+@api.route('pets/lost/<int:page>', methods=['GET'])
+def get_pets_lost(page=1):
+    pets = Pet.query.filter_by(state=Pet_state.lost).paginate(page=page, per_page=10)
+    return jsonify([pet.serialize_info_for_lost() for pet in pets.items], pets.pages, pets.has_next, pets.has_prev), 200
