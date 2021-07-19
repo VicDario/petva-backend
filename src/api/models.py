@@ -96,6 +96,7 @@ class Pet(db.Model):
             'name': self.name,
             'code_chip': self.code_chip,
             'birth_date': self.birth_date,
+            'last_location': self.last_location,
             'breed': self.breed,
             'specie': self.specie,
             'picture': self.picture,
@@ -247,6 +248,6 @@ class Foundation(db.Model):
             'address': self.address,
             'picture': self.picture
         }
-        
+
     def serialize_pets(self):
         return list(map(lambda pet: pet.serialize(), self.pets))
