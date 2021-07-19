@@ -98,7 +98,7 @@ class Pet(db.Model):
             'birth_date': self.birth_date,
             'last_location': self.last_location,
             'breed': self.breed,
-            'specie': self.specie,
+            'specie': specie,
             'picture': self.picture,
             'email_owner': self.user.email,
             'phone_owner': self.user.phone,
