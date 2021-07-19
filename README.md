@@ -64,8 +64,14 @@
 
         returns:    201 if the pet was added
 
-- `[GET] /api/user/pets/<int:pet_id>/report/lost` Report a pet how lost.
+- `[POST] /api/user/pets/<int:pet_id>/report/lost` Report a pet how lost.
 > User must be logged.
+
+    JSON body must have this:
+
+        {
+            "last_location": "some last_location",
+        }
 
 - `[GET] /api/user/pets/<int:pet_id>/report/founded` Report a pet how founded.
 > User must be logged.
@@ -296,6 +302,10 @@
         returns:    201 if the surgery was added
                     404 if the pet was not found
 
-- `[GET] '/api/pets/in_adoption'` Gets all pets in adoption with all info necessary.
+- `[GET] '/api/pets/in_adoption/<int:page>'` Gets pets in adoption with all info necessary. 10 pets per page.
 
-- `[GET] '/api/pets/lost'` Gets all lost pets with all info necessary.
+    returns:  {pets(array), number_of_pages(int), page_has_next(Boolean), page_has_previous(Boolean)}, 200
+
+- `[GET] '/api/pets/lost/<int:page>'` Gets lost pets with all info necessary. 10 pets per page.
+
+    returns:  {pets(array), number_of_pages(int), page_has_next(Boolean), page_has_previous(Boolean)}, 200
