@@ -15,7 +15,7 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     phone = db.Column(db.String(12))
     picture = db.Column(db.Text)
-    pets = db.relationship('Pet', cascade='all, delete', backref='User')
+    pets = db.relationship('Pet', cascade='all, delete', backref='user')
 
     def serialize(self):
         return {
@@ -41,14 +41,10 @@ class Pet(db.Model):
     birth_date = db.Column(db.Date)
     breed = db.Column(db.String(30))
     state = db.Column(db.Enum(Pet_state), nullable=False)
+    last_location = db.Column(db.Text)
     id_owner = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     id_foundation  = db.Column(db.Integer, db.ForeignKey('foundations.id', ondelete='CASCADE'), nullable=True)
-    history = db.relationship('History', cascade='all, delete', backref='Pet', uselist=False)
-    email = None
-    phone = None
-    address = None
-    contact_name = None
-    contact_picture = None
+    history = db.relationship('History', cascade='all, delete', backref='pet', uselist=False)
 
     def serialize(self):
         if self.specie == Specie.cat:
@@ -74,7 +70,7 @@ class Pet(db.Model):
             'state': state,
             'picture': self.picture
         }
-    def serialize_info(self):
+    def serialize_info_for_adoption(self):
         if self.specie == Specie.cat:
             specie = 'cat'
         if self.specie == Specie.dog:
@@ -84,11 +80,29 @@ class Pet(db.Model):
             'specie': specie,
             'birth_date': self.birth_date,
             'picture': self.picture,
-            'email': self.email,
-            'phone': self.phone,
-            'address': self.address,
-            'contact_name': self.contact_name,
-            'contact_picture': self.contact_picture
+            'name_foundation': self.foundation.name,
+            'email_foundation': self.foundation.email,
+            'phone_foundation': self.foundation.phone,
+            'address_foundation': self.foundation.address,
+            'picture_foundation': self.foundation.picture
+        }
+    
+    def serialize_info_for_lost(self):
+        if self.specie == Specie.cat:
+            specie = 'cat'
+        if self.specie == Specie.dog:
+            specie = 'dog'
+        return {
+            'name': self.name,
+            'code_chip': self.code_chip,
+            'birth_date': self.birth_date,
+            'breed': self.breed,
+            'specie': self.specie,
+            'picture': self.picture,
+            'email_owner': self.user.email,
+            'phone_owner': self.user.phone,
+            'address_owner': self.user.address,
+            'name_owner': self.user.name
         }
 
     def serialize_history(self):
@@ -104,9 +118,9 @@ class History(db.Model):
     __tablename__ = 'histories'
     id = db.Column(db.Integer, primary_key=True)
     id_pet = db.Column(db.Integer, db.ForeignKey('pets.id', ondelete='CASCADE'))
-    vaccines = db.relationship('Vaccine', cascade='all, delete', backref='History')
-    diagnostics = db.relationship('Diagnostic', cascade='all, delete', backref='History')
-    surgeries = db.relationship('Surgery', cascade='all, delete', backref='History')
+    vaccines = db.relationship('Vaccine', cascade='all, delete', backref='history')
+    diagnostics = db.relationship('Diagnostic', cascade='all, delete', backref='history')
+    surgeries = db.relationship('Surgery', cascade='all, delete', backref='history')
 
     def serialize_vaccines(self):
         return list(map(lambda vaccine: vaccine.serialize(), self.vaccines))
@@ -176,7 +190,7 @@ class Clinic(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
-    doctors = db.relationship('Doctor', cascade='all, delete', backref='Clinic')
+    doctors = db.relationship('Doctor', cascade='all, delete', backref='clinic')
     picture = db.Column(db.Text)
     
     def serialize(self):
@@ -222,7 +236,7 @@ class Foundation(db.Model):
     password = db.Column(db.String(200), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     picture = db.Column(db.Text)
-    pets = db.relationship('Pet', backref='Foundation')
+    pets = db.relationship('Pet', backref='foundation')
 
     def serialize(self):
         return {
@@ -233,5 +247,6 @@ class Foundation(db.Model):
             'address': self.address,
             'picture': self.picture
         }
+        
     def serialize_pets(self):
         return list(map(lambda pet: pet.serialize(), self.pets))
