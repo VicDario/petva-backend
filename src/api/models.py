@@ -102,8 +102,7 @@ class Pet(db.Model):
             'picture': self.picture,
             'email_owner': self.user.email,
             'phone_owner': self.user.phone,
-            'address_owner': self.user.address,
-            'name_owner': self.user.name
+            'name_owner': self.user.name + ' ' + self.user.lastname,
         }
 
     def serialize_history(self):
