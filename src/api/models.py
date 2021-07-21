@@ -5,6 +5,7 @@ db = SQLAlchemy()
 
 Specie = Enum('Specie', 'cat dog')
 Pet_state = Enum('Pet_State', 'adoption owned lost')
+Reservation_Status = Enum('Reservation_Status', 'avaliable reserved')
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -225,6 +226,28 @@ class Doctor(db.Model):
             'lastname': self.lastname,
             'specialty': self.specialty,
             'picture' : self.picture
+        }
+
+class Reservation(db.Model):
+    __tablename__ = 'reservation'
+    id = db.Column(db.Integer, primary_key=True)
+    id_clinic = db.Column(db.Integer, db.ForeignKey('clinics.id', ondelete='CASCADE'))
+    id_pet = db.Column(db.Integer, db.ForeignKey('pets.id', ondelete='CASCADE'), nullable=True)
+    date_start = db.Column(db.Date, nullable=False)
+    date_end = db.Column(db.Date, nullable=False)
+    status = db.Column(db.Enum(Reservation_Status), nullable=False)
+    id_user = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
+    id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id', ondelete='CASCADE'))
+    
+    def serialize(self):
+        return {
+            'id': self.id,
+            'id_clinic': self.id_clinic,
+            'id_pet': self.id_pet,
+            'date_start': self.date_start,
+            'date_end': self.date_end,
+            'id_user': self.id_user,
+            'id_doctor': self.id_doctor
         }
 
 class Foundation(db.Model):
