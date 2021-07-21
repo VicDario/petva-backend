@@ -292,7 +292,7 @@ def get_reservations_clinic(clinic_id, doctor_id):
     doctor = Doctor.query.filter_by(id=doctor_id).first()
     if doctor is None:
         return jsonify(Error="Doctor not found"), 404
-    reservations = Reservation.query.filter_by(id_doctor=doctor.id, id_clinic=clinic.id).all()
+    reservations = Reservation.query.filter_by(id_doctor=doctor.id).all()
     return jsonify(Reservations=[i.serialize() for i in reservations]), 200
 
 @api.route('/user/clinics/<int:clinic_id>/doctor/<int:doctor_id>/reservation/add', methods=['POST'])
@@ -383,7 +383,7 @@ def get_doctors():
     doctors = Doctor.query.filter_by(id_clinic=clinic.id).all()
     return jsonify(Doctors=[i.serialize() for i in doctors]), 200
 
-@api.route('/api/clinic/doctor/<int:id_doctor>', methods=['DELETE'])
+@api.route('/clinic/doctor/<int:id_doctor>', methods=['DELETE'])
 @jwt_required()
 def delete_doctor(id_doctor):
     current_user = get_jwt_identity()
@@ -416,15 +416,28 @@ def add_reservation_doctor():
     reservation.id_doctor = doctor.id
     reservation.id_clinic = doctor.clinic.id
     reservation.status = Reservation_Status.available
-    date = request.json.get('date')
     hour_start = request.json.get('hour_start')
     hour_end = request.json.get('hour_end')
-    reservation.date_start = datetime.fromisoformat(request.json.get("hour_start"))
-    reservation.date_end = datetime.fromisoformat(request.json.get("hour_end"))
-    print(reservation.date_start)
-    """ db.session.add(reservation)
-    db.session.commit() """
+    reservation.date_start = datetime.strptime(hour_start, "%d/%m/%Y %H:%M:%S")
+    reservation.date_end = datetime.strptime(hour_end,  "%d/%m/%Y %H:%M:%S")
+
+    db.session.add(reservation)
+    db.session.commit()
+    
+    print(reservation.serialize())
     return jsonify(Success="Reservation added"), 201
+
+@api.route('/doctor/reservations/<int:id_reservation>', methods=['DELETE'])
+@jwt_required()
+def delete_reservation_doctor(id_reservation):
+    current_user = get_jwt_identity()
+    doctor = Doctor.query.filter_by(email=current_user).first()
+    reservation = Reservation.query.filter_by(id_doctor=doctor.id, id=id_reservation).first()
+    if reservation is None:
+        return jsonify(Error="Reservation not found"), 404
+    db.session.delete(reservation)
+    db.session.commit()
+    return jsonify(Success="Reservation deleted"), 203
 
 @api.route('/doctor/reservations/reserved', methods=['GET'])
 @jwt_required()
