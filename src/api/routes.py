@@ -346,6 +346,16 @@ def login_clinic():
     else:
         return jsonify({"Error": "Bad username or password"}), 401
 
+@api.route('/clinic/info', methods=['GET'])
+@jwt_required()
+def info_clinic():
+    current_user = get_jwt_identity()
+    clinic = Clinic.query.filter_by(email=current_user).first()
+
+    return jsonify(clinic.serialize()), 200
+
+#Doctor Routes
+
 @api.route('/clinic/doctor/register', methods=['POST']) #checked
 @jwt_required()
 def register_doctor():
