@@ -1,10 +1,10 @@
 from flask import json, request, jsonify, url_for, Blueprint
 from sqlalchemy.orm import query
-from api.models import Diagnostic, History, Surgery, Vaccine, db, User, Pet, Clinic, Doctor, Foundation, Specie, Pet_state
+from api.models import Reservation, Diagnostic, History, Surgery, Vaccine, db, User, Pet, Clinic, Doctor, Foundation, Specie, Pet_state, Reservation_Status
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 import uuid
 
 api = Blueprint('api', __name__)
@@ -14,7 +14,6 @@ sessiontime = timedelta(hours=1)
 @api.route('/', methods=['GET'])
 def main():
     return jsonify(Test="Test"), 200
-
 
 #User Routes
 
@@ -53,6 +52,26 @@ def info_user():
 
     return jsonify(user.serialize()), 200
 
+@api.route('/user/info', methods=['PUT'])
+@jwt_required()
+def update_user():
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    if user is None:
+        return jsonify(Error="User not found"), 404
+    user.name = request.json.get('name')
+    user.lastname = request.json.get('lastname')
+    user.phone = request.json.get('phone')
+    user.email = request.json.get('email')
+    if request.json.get('picture') is not None:
+        user.picture = request.json.get('picture')
+    db.session.commit()
+    if request.json.get('password') is not None:
+        user.password = generate_password_hash(request.json.get('password'))
+    
+    return jsonify(Success="User updated"), 202
+
+
 @api.route('/user/pets', methods=['GET'])
 @jwt_required()
 def pets_user():
@@ -72,7 +91,42 @@ def pet_user(pet_id):
     pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
-    return jsonify(pet.serialize())
+    return jsonify(pet.serialize()), 200
+
+@api.route('/user/pets/<int:pet_id>', methods=['DELETE'])
+@jwt_required()
+def delete_pet_user(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    if user is None:
+        return jsonify(Error="User not found"), 404
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+    if pet.id_foundation is not None:
+        return jsonify(Error="Cannot delete a pet that is part of a Foundation"), 409
+    db.session.delete(pet)
+    db.session.commit()
+    return jsonify(Success="Pet deleted"), 203
+
+@api.route('/user/pets/<int:pet_id>', methods=['PUT'])
+@jwt_required()
+def update_pet_user(pet_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    if user is None:
+        return jsonify(Error="User not found"), 404
+    pet = Pet.query.filter_by(id_owner=user.id, id=pet_id).first()
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+
+    pet.name = request.json.get('name')
+    pet.code_chip = request.json.get('code_chip')
+    pet.breed = request.json.get('breed')
+    if request.json.get('picture') is not None:
+        pet.picture = request.json.get('picture')
+    db.session.commit()
+    return jsonify(Success="Success changes"), 202
 
 @api.route('/user/pets/add', methods=['POST'])
 @jwt_required()
@@ -214,9 +268,58 @@ def get_report_pet_user_lost(pet_id):
     db.session.commit()
     return jsonify(Success="Pet {} {} reported".format(pet.id, pet.name)), 200
 
+
+#User to clinic
+
+@api.route('/user/clinics/list', methods=['GET'])
+def get_clinics():
+    clinics = Clinic.query.all()
+    return jsonify(Clinics=[i.serialize() for i in clinics]), 200
+
+@api.route('/user/clinics/<int:clinic_id>/doctors', methods=['GET'])
+def get_doctors_clinic(clinic_id):
+    clinic = Clinic.query.filter_by(id=clinic_id).first()
+    if clinic is None:
+        return jsonify(Error="Clinic not found"), 404
+    doctors = Doctor.query.filter_by(id_clinic=clinic.id).all()
+    return jsonify(Doctors=[i.serialize() for i in doctors]), 200
+
+@api.route('/user/clinics/<int:clinic_id>/doctor/<int:doctor_id>/reservations', methods=['GET'])
+def get_reservations_clinic(clinic_id, doctor_id):
+    clinic = Clinic.query.filter_by(id=clinic_id).first()
+    if clinic is None:
+        return jsonify(Error="Clinic not found"), 404
+    doctor = Doctor.query.filter_by(id=doctor_id).first()
+    if doctor is None:
+        return jsonify(Error="Doctor not found"), 404
+    reservations = Reservation.query.filter_by(id_doctor=doctor.id, id_clinic=clinic.id).all()
+    return jsonify(Reservations=[i.serialize() for i in reservations]), 200
+
+@api.route('/user/clinics/<int:clinic_id>/doctor/<int:doctor_id>/reservation/add', methods=['POST'])
+@jwt_required()
+def add_reservation_clinic(clinic_id, doctor_id):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    clinic = Clinic.query.filter_by(id=clinic_id).first()
+    if clinic is None:
+        return jsonify(Error="Clinic not found"), 404
+    doctor = Doctor.query.filter_by(id=doctor_id).first()
+    if doctor is None:
+        return jsonify(Error="Doctor not found"), 404
+    id_reservation = request.json.get("id_reservation")
+    reservation = Reservation.query.filter_by(id_doctor=doctor.id, id_clinic=clinic.id, id=id_reservation).first()
+    if reservation is None:
+        return jsonify(Error="Reservation not found"), 404
+    reservation.id_patient = user.id
+    reservation.state = Reservation_Status.reserved
+    reservation.id_pet = request.json.get("id_pet")
+    
+    db.session.commit()
+    return jsonify(Success="Reservation added in clinic id: {}".format(clinic.id)), 201
+
 #Clinic Routes
 
-@api.route('/clinic/register', methods=['POST'])
+@api.route('/clinic/register', methods=['POST']) #checked
 def register_clinic():
     if Clinic.query.filter_by(email=request.json.get("email")).first() is not None:
         return jsonify(Error="Clinic already registered"), 409
@@ -232,7 +335,7 @@ def register_clinic():
 
     return jsonify(Success='Clinic created'), 201
 
-@api.route('/clinic/login', methods=['POST'])
+@api.route('/clinic/login', methods=['POST']) #checked
 def login_clinic():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
@@ -243,14 +346,14 @@ def login_clinic():
     else:
         return jsonify({"Error": "Bad username or password"}), 401
 
-
-#Doctor Routes
-
-@api.route('/doctor/register', methods=['POST']) #Incomplete
+@api.route('/clinic/doctor/register', methods=['POST']) #checked
+@jwt_required()
 def register_doctor():
-    if Doctor.query.filter_by(email=request.json.get('email')).first() is not None:
-        return jsonify(Error="Doctor already exists"), 400
+    current_user = get_jwt_identity()
+    clinic = Clinic.query.filter_by(email=current_user).first()
+    
     doctor = Doctor()
+    doctor.id_clinic = clinic.id
     doctor.email = request.json.get('email')
     doctor.name = request.json.get('name')
     doctor.lastname = request.json.get('lastname')
@@ -262,7 +365,27 @@ def register_doctor():
 
     return jsonify(Success='Doctor created'), 201
 
-@api.route('/doctor/login', methods=['POST'])
+@api.route('/clinic/doctor', methods=['GET']) #checked
+@jwt_required()
+def get_doctors():
+    current_user = get_jwt_identity()
+    clinic = Clinic.query.filter_by(email=current_user).first()
+    doctors = Doctor.query.filter_by(id_clinic=clinic.id).all()
+    return jsonify(Doctors=[i.serialize() for i in doctors]), 200
+
+@api.route('/api/clinic/doctor/<int:id_doctor>', methods=['DELETE'])
+@jwt_required()
+def delete_doctor(id_doctor):
+    current_user = get_jwt_identity()
+    clinic = Clinic.query.filter_by(email=current_user).first()
+    doctor = Doctor.query.filter_by(id_clinic=clinic.id, id=id_doctor).first()
+    if doctor is None:
+        return jsonify(Error="Doctor not found"), 404
+    db.session.delete(doctor)
+    db.session.commit()
+    return jsonify(Success="Doctor deleted"), 203
+
+@api.route('/doctor/login', methods=['POST']) #checked
 def login_doctor():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
@@ -272,6 +395,34 @@ def login_doctor():
         return jsonify(access_token=access_token), 201
     else:
         return jsonify({"Error": "Bad username or password"}), 401
+
+@api.route('/doctor/reservations/add', methods=['POST'])
+@jwt_required()
+def add_reservation_doctor():
+    current_user = get_jwt_identity()
+    doctor = Doctor.query.filter_by(email=current_user).first()
+
+    reservation = Reservation()
+    reservation.id_doctor = doctor.id
+    reservation.id_clinic = doctor.clinic.id
+    reservation.status = Reservation_Status.available
+    date = request.json.get('date')
+    hour_start = request.json.get('hour_start')
+    hour_end = request.json.get('hour_end')
+    reservation.date_start = datetime.fromisoformat(request.json.get("hour_start"))
+    reservation.date_end = datetime.fromisoformat(request.json.get("hour_end"))
+    print(reservation.date_start)
+    """ db.session.add(reservation)
+    db.session.commit() """
+    return jsonify(Success="Reservation added"), 201
+
+@api.route('/doctor/reservations/reserved', methods=['GET'])
+@jwt_required()
+def get_reservations_doctor_reserved():
+    current_user = get_jwt_identity()
+    doctor = Doctor.query.filter_by(email=current_user).first()
+    reservations = Reservation.query.filter_by(id_doctor=doctor.id, state=Reservation_Status.reserved).all()
+    return jsonify(Reservations=[i.serialize for i in reservations]), 200
 
 #Foundation Routes
 
@@ -309,6 +460,22 @@ def info_foundation():
     foundation = Foundation.query.filter_by(email=current_user).first()
 
     return jsonify(foundation.serialize())
+
+@api.route('/foundation/info', methods=['PUT'])
+@jwt_required()
+def update_foundation():
+    current_user = get_jwt_identity()
+    foundation = Foundation.query.filter_by(email=current_user).first()
+    foundation.name = request.json.get('name')
+    foundation.address = request.json.get('address')
+    foundation.phone = request.json.get('phone')
+    foundation.email = request.json.get('email')
+    if request.json.get('picture') is not None:
+        foundation.picture = request.json.get('picture')
+    if request.json.get('password') is not None:
+        foundation.password = generate_password_hash(request.json.get('password'))
+    db.session.commit()
+    return jsonify(Success="Foundation updated"), 202
 
 @api.route('/foundation/pets/add', methods=['POST'])
 @jwt_required()
@@ -372,6 +539,25 @@ def foundation_pet(pet_id):
         return jsonify(Error="Pet not found"), 404
 
     return jsonify(pet.serialize()), 200
+
+@api.route('/foundation/pets/<int:pet_id>', methods=['PUT'])
+@jwt_required()
+def update_foundation_pet(pet_id):
+    current_user = get_jwt_identity()
+    foundation = Foundation.query.filter_by(email=current_user).first()
+    if foundation is None:
+        return jsonify(Error="Foundation not found"), 404
+    pet = Pet.query.filter_by(id_foundation=foundation.id, id=pet_id).first()
+    if pet is None:
+        return jsonify(Error="Pet not found"), 404
+    pet.name = request.json.get('name')
+    pet.code_chip = request.json.get('code_chip')
+    pet.breed = request.json.get('breed')
+    if request.json.get('picture') is not None:
+        pet.picture = request.json.get('picture')
+    
+    db.session.commit()
+    return jsonify(Success="Pet updated"), 202
 
 @api.route('/foundation/transfer', methods=['POST'])
 @jwt_required()
