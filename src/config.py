@@ -1,5 +1,4 @@
 import os
-import re
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
@@ -16,16 +15,13 @@ class Config(object):
 class ProductionConfig(Config):
     DEBUG = False
 
-
 class StagingConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
 
-
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
-
 
 class TestingConfig(Config):
     TESTING = True
