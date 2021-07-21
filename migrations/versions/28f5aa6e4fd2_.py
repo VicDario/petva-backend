@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: fba98e530f34
+Revision ID: 28f5aa6e4fd2
 Revises: 
-Create Date: 2021-07-19 11:56:54.239043
+Create Date: 2021-07-21 18:20:34.741903
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'fba98e530f34'
+revision = '28f5aa6e4fd2'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -86,6 +86,21 @@ def upgrade():
     sa.ForeignKeyConstraint(['id_pet'], ['pets.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('reservation',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id_clinic', sa.Integer(), nullable=True),
+    sa.Column('id_pet', sa.Integer(), nullable=True),
+    sa.Column('date_start', sa.DateTime(), nullable=False),
+    sa.Column('date_end', sa.DateTime(), nullable=False),
+    sa.Column('status', sa.Enum('available', 'reserved', name='reservation_status'), nullable=False),
+    sa.Column('id_user', sa.Integer(), nullable=True),
+    sa.Column('id_doctor', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id_clinic'], ['clinics.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['id_doctor'], ['doctors.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['id_pet'], ['pets.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['id_user'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('diagnostics',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('id_history', sa.Integer(), nullable=True),
@@ -122,6 +137,7 @@ def downgrade():
     op.drop_table('vaccines')
     op.drop_table('surgeries')
     op.drop_table('diagnostics')
+    op.drop_table('reservation')
     op.drop_table('histories')
     op.drop_table('pets')
     op.drop_table('doctors')
