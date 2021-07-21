@@ -36,6 +36,20 @@
            
 - `[GET] /api/user/info`  Get user info.
 > User must be logged.
+
+- `[PUT] /api/user/info`  Modify user info.
+> User must be logged.
+    JSON body must have this data:
+        {
+            "email": "some email",
+            "name":"some name",
+            "lastname":"some lastname",
+            "phone": "some phone",
+            "picture": "some picture", -> Optional -> if not provided, the picture will not be modified -> send null
+            "password": "some password" -> Optional -> if not provided, the password will not be modified -> send null
+        }
+
+        return: 202 if info was modified.
 ### User Pets
 - `[GET] /api/user/pets` Get pets of a user.
 > User must be logged.
@@ -47,6 +61,31 @@
 
         returns:    200 if the pet was found with its info.
                     404 if the pet was not found
+
+                    
+- `[PUT] /api/user/pets/<int:pet_id>` Modify pet by id.
+> User must be logged.
+
+    JSON body must have this:
+
+        {
+            "name": "some name",
+            "code_chip": "some code_chip",
+            "breed": "some breed",
+            "picture": "some picture"
+        }
+
+        returns:    202 if the info was modified.
+                    404 if the pet was not found
+
+- `[DELETE] /api/user/pets/<int:pet_id>` Delete pet by id.
+> User must be logged.
+
+    JSON body must have this:
+
+        returns:    203 if the pet was deleted.
+                    404 if the pet was not found.
+                    409 if the pet is part of a foundation, cannot be deleted.
 
 - `[POST] /api/user/pets/add` Add a pet to an user.
 > User must be logged.
@@ -149,7 +188,8 @@
         returns:    401 if email or password is not correct.
                     201 if clinic is logged in.
 ### Doctors
-- `[POST] /api/doctor/register` Register a doctor in the database.
+- `[POST] /api/clinic/doctor/register` Register a doctor in the database.
+> Clinic must be logged.
     JSON body must have this data to register a doctor:
 
         {
@@ -162,6 +202,9 @@
 
         returns:    409 if the email already exists
                     201 if the doctor was created
+    
+-`[DELETE] /api/clinic/doctor/<int:id_doctor` Delete a doctor.
+> Clinic must be logged.
 
 - `[POST] /api/doctor/login` Log in a doctor.
 
@@ -174,6 +217,26 @@
 
         returns:    401 if email or password is not correct.
                     201 if the doctor was logged in.
+
+-`[GET] /user/clinics/<int:clinic_id>/doctor/<int:doctor_id>/reservation/add` Add a reservation to a doctor.
+> Doctor must be logged.
+
+    JSON body must have this data:
+        {
+            "id_pet": "some id_pet",
+        }
+
+
+### Doctors
+
+-`[POST] /doctor/reservations/add` Open a reservation.
+> Doctor must be logged.
+    JSON body must have this data:
+        {
+            "hour_start": "some hour_start", -> Format ISO
+            "hour_end": "some hour_end", -> Format ISO
+        }
+
 ### Fundations
 - `[POST] /api/foundation/register` Register a foundation in the database.
 
@@ -191,7 +254,7 @@
                 201 if the fundation was created
 
 - `[POST] /api/foundation/login` Log in a foundation.
-    >Foundation must be logged in
+>Foundation must be logged in
     
     JSON body must have this data:
 
@@ -204,28 +267,43 @@
                     201 if the foundation was logged in.
 
 - `[GET] /api/foundation/info` Return the foundation's info.
-    >Foundation must be logged in
+>Foundation must be logged in
 
         returns:    200 with the foundation's info
 
+- `[PUT] /api/foundation/info`  Modify user info.
+> Foundation must be logged.
+
+    JSON body must have this data:
+        {
+            "email": "some email",
+            "name":"some name",
+            "address":"some address",
+            "phone": "some phone",
+            "picture": "some picture", -> Optional -> if not provided, the picture will not be modified -> send null
+            "password": "some password" -> Optional -> if not provided, the password will not be modified -> send null
+        }
+
+        return: 202 if info was modified.
+
 - `[GET] /api/foundation/pets/in_adoption` Return the foundation's pets in adoption.
-    >Foundation must be logged in
+>Foundation must be logged in
 
         returns:    200 with the pets in adoption
 
 - `[GET] /api/foundation/pets/owned` Return the foundation's pets with owner for tracking.
-    >Foundation must be logged in
+>Foundation must be logged in
 
         returns:    200 with the pets with owner for tracking
 
 - `[GET] /api/foundation/pets/<int:pet_id>` Return a specific foundation's pet.
-    >Foundation must be logged in
+>Foundation must be logged in
 
         returns:    200 with the pet
                     404 if the pet was not found
 
 - `[POST] /api/foundation/pets/add` Log in a foundation.
-    >Foundation must be logged in
+>Foundation must be logged in
     
     JSON body must have this data:
 
@@ -241,7 +319,7 @@
         returns:    201 if the pet was added
 
 - `[POST] /api/foundation/transfer` Transfer a pet to an user.
-    >Foundation must be logged in
+>Foundation must be logged in
 
     JSON body must have this data:
 
@@ -260,7 +338,7 @@
                     404 if the pet was not found
 
 - `[POST] /api//foundation/pets/<int:pet_id>/history/vaccine/add` Add a vaccine to history of a pet.
-    >Foundation must be logged in
+>Foundation must be logged in
 
     JSON body must have this data:
 
@@ -275,7 +353,7 @@
                     404 if the pet was not found
                 
 - `[POST] /api/foundation/pets/<int:pet_id>/history/diagnostic/add` Add a diagnostic to history of a pet.
-    >Foundation must be logged in
+>Foundation must be logged in
 
     JSON body must have this data:
 
@@ -289,7 +367,7 @@
                     404 if the pet was not found
 
 - `[POST] /api/foundation/pets/<int:pet_id>/history/surgery/add` Add a surgery to history of a pet.
-    >Foundation must be logged in
+>Foundation must be logged in
 
     JSON body must have this data:
 
