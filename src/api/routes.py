@@ -354,6 +354,14 @@ def info_clinic():
 
     return jsonify(clinic.serialize()), 200
 
+@api.routes('/clinic/check/reserved', methods=['GET'])
+@jwt_required()
+def check_reserved_clinic():
+    current_user = get_jwt_identity()
+    clinic = Clinic.query.filter_by(email=current_user).first()
+    reservations = Reservation.query.filter_by(id_clinic=clinic.id, state=Reservation_Status.reserved).all()
+    return jsonify([i.serialize() for i in reservations]), 200
+
 #Doctor Routes
 
 @api.route('/clinic/doctor/register', methods=['POST']) #checked
