@@ -17,6 +17,7 @@ class User(db.Model):
     phone = db.Column(db.String(12))
     picture = db.Column(db.Text)
     pets = db.relationship('Pet', cascade='all, delete', backref='user')
+    reservations = db.relationship('Reservation', cascade='all, delete', backref='user')
 
     def serialize(self):
         return {
@@ -46,6 +47,7 @@ class Pet(db.Model):
     id_owner = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     id_foundation  = db.Column(db.Integer, db.ForeignKey('foundations.id', ondelete='CASCADE'), nullable=True)
     history = db.relationship('History', cascade='all, delete', backref='pet', uselist=False)
+    reservations = db.relationship('Reservation', cascade='all, delete', backref='pet', uselist=False)
 
     def serialize(self):
         if self.specie == Specie.cat:
@@ -191,8 +193,9 @@ class Clinic(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     phone = db.Column(db.String(15), nullable=False)
-    doctors = db.relationship('Doctor', cascade='all, delete', backref='clinic')
     picture = db.Column(db.Text)
+    doctors = db.relationship('Doctor', cascade='all, delete', backref='clinic')
+    reservations = db.relationship('Reservation', cascade='all, delete', backref='clinic')
     
     def serialize(self):
         return {
@@ -217,6 +220,7 @@ class Doctor(db.Model):
     password = db.Column(db.String(200), nullable=False)
     specialty = db.Column(db.String(50), nullable=False)
     picture = db.Column(db.Text)
+    reservations = db.relationship('Reservation', cascade='all, delete', backref='doctor')
 
     def serialize(self):
         return {
@@ -241,6 +245,14 @@ class Reservation(db.Model):
     id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id', ondelete='CASCADE'))
     
     def serialize(self):
+        if self.id_user is None:
+            email = None
+        else:
+            email = self.user.email
+        if self.id_pet is None:
+            pet = None
+        else:
+            pet = self.pet.serialize()
         return {
             'id': self.id,
             'id_clinic': self.id_clinic,
@@ -248,7 +260,10 @@ class Reservation(db.Model):
             'date_start': self.date_start,
             'date_end': self.date_end,
             'id_user': self.id_user,
-            'id_doctor': self.id_doctor
+            'id_doctor': self.id_doctor,
+            'email_customer': email,
+            'doctor_name': self.doctor.name,
+            'info_pet': pet,
         }
 
 class Foundation(db.Model):
