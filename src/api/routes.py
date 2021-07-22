@@ -354,12 +354,15 @@ def info_clinic():
 
     return jsonify(clinic.serialize()), 200
 
-@api.route('/clinic/check/reserved', methods=['GET'])
+@api.route('/clinic/check/reservations', methods=['GET'])
 @jwt_required()
 def check_reserved_clinic():
     current_user = get_jwt_identity()
     clinic = Clinic.query.filter_by(email=current_user).first()
-    reservations = Reservation.query.filter_by(id_clinic=clinic.id, status=Reservation_Status.reserved).all()
+    if clinic is None:
+        return jsonify(Error="Clinic not found"), 404
+    print(clinic.name)
+    reservations = Reservation.query.filter_by(id_clinic=clinic.id).all()
     return jsonify([i.serialize() for i in reservations]), 200
 
 
