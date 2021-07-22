@@ -274,7 +274,7 @@ def get_report_pet_user_lost(pet_id):
 @api.route('/user/clinics/list', methods=['GET'])
 def get_clinics():
     clinics = Clinic.query.all()
-    return jsonify(Clinics=[i.serialize() for i in clinics]), 200
+    return jsonify([i.serialize() for i in clinics]), 200
 
 @api.route('/user/clinics/<int:clinic_id>/doctors', methods=['GET'])
 def get_doctors_clinic(clinic_id):
@@ -282,7 +282,7 @@ def get_doctors_clinic(clinic_id):
     if clinic is None:
         return jsonify(Error="Clinic not found"), 404
     doctors = Doctor.query.filter_by(id_clinic=clinic.id).all()
-    return jsonify(Doctors=[i.serialize() for i in doctors]), 200
+    return jsonify([i.serialize() for i in doctors]), 200
 
 @api.route('/user/clinics/<int:clinic_id>/doctor/<int:doctor_id>/reservations', methods=['GET'])
 def get_reservations_clinic(clinic_id, doctor_id):
@@ -293,7 +293,7 @@ def get_reservations_clinic(clinic_id, doctor_id):
     if doctor is None:
         return jsonify(Error="Doctor not found"), 404
     reservations = Reservation.query.filter_by(id_doctor=doctor.id).all()
-    return jsonify(Reservations=[i.serialize() for i in reservations]), 200
+    return jsonify([i.serialize() for i in reservations]), 200
 
 @api.route('/user/clinics/<int:clinic_id>/doctor/<int:doctor_id>/reservation/add', methods=['POST'])
 @jwt_required()
