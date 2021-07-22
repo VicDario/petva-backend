@@ -187,6 +187,18 @@
 
         returns:    401 if email or password is not correct.
                     201 if clinic is logged in.
+
+- `[GET] /api/clinic/info` Get clinic info.
+> Clinic must be logged.
+
+        returns:    200 with the clinic info
+
+- `[PUT] /api/clinic/info` Modify clinic info.  // TODO Create this route
+
+- `[GET] /api/clinic/check/reserved` Get reservations.
+> Clinic must be logged.
+
+        returns:    200 with a list of reservations
 ### Doctors
 - `[POST] /api/clinic/doctor/register` Register a doctor in the database.
 > Clinic must be logged.
