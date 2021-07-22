@@ -389,7 +389,7 @@ def get_doctors():
     current_user = get_jwt_identity()
     clinic = Clinic.query.filter_by(email=current_user).first()
     doctors = Doctor.query.filter_by(id_clinic=clinic.id).all()
-    return jsonify(Doctors=[i.serialize() for i in doctors]), 200
+    return jsonify([i.serialize() for i in doctors]), 200
 
 @api.route('/clinic/doctor/<int:id_doctor>', methods=['DELETE'])
 @jwt_required()
@@ -453,7 +453,7 @@ def get_reservations_doctor_reserved():
     current_user = get_jwt_identity()
     doctor = Doctor.query.filter_by(email=current_user).first()
     reservations = Reservation.query.filter_by(id_doctor=doctor.id, state=Reservation_Status.reserved).all()
-    return jsonify(Reservations=[i.serialize for i in reservations]), 200
+    return jsonify([i.serialize for i in reservations]), 200
 
 #Foundation Routes
 
@@ -619,7 +619,7 @@ def get_history_pet_foundation(pet_id):
     if pet is None:
         return jsonify(Error="Pet not found"), 404
     
-    return jsonify(History=pet.serialize_history()), 200
+    return jsonify(pet.serialize_history()), 200
 
 
 @api.route('/foundation/pets/<int:pet_id>/history/vaccine/add', methods=['POST'])
