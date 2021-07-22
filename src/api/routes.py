@@ -359,7 +359,7 @@ def info_clinic():
 def check_reserved_clinic():
     current_user = get_jwt_identity()
     clinic = Clinic.query.filter_by(email=current_user).first()
-    reservations = Reservation.query.filter_by(id_clinic=clinic.id, state=Reservation_Status.reserved).all()
+    reservations = Reservation.query.filter_by(id_clinic=clinic.id, status=Reservation_Status.reserved).all()
     return jsonify([i.serialize() for i in reservations]), 200
 
 
