@@ -224,6 +224,7 @@ class Doctor(db.Model):
             'id_clinic': self.id_clinic,
             'name': self.name,
             'lastname': self.lastname,
+            'email': self.email,
             'specialty': self.specialty,
             'picture' : self.picture
         }
