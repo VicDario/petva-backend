@@ -5,7 +5,7 @@ db = SQLAlchemy()
 
 Specie = Enum('Specie', 'cat dog')
 Pet_state = Enum('Pet_State', 'adoption owned lost')
-Reservation_Status = Enum('Reservation_Status', 'available reserved')
+Reservation_Status = Enum('Reservation_Status', 'available reserved canceled confirmed missed' )
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -267,6 +267,15 @@ class Reservation(db.Model):
             pet = None
         else:
             pet = self.pet.serialize_for_reservation()
+
+        if self.status == Reservation_Status.available:
+            status = 'available'
+        elif self.status == Reservation_Status.reserved:
+            status = 'Reserved'
+        elif self.status == Reservation_Status.canceled:
+            status = 'canceled'
+        elif self.status == Reservation_Status.missed:
+            status = 'missed'
         return {
             'id': self.id,
             'phone': phone,
@@ -277,8 +286,9 @@ class Reservation(db.Model):
             'id_user': self.id_user,
             'id_doctor': self.id_doctor,
             'email_customer': email,
-            'doctor_name': self.doctor.name,
+            'doctor_name': self.doctor.name + ' ' + self.doctor.lastname,
             'info_pet': pet,
+            'status' : status
         }
 
 class Foundation(db.Model):
