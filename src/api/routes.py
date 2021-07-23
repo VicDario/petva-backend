@@ -292,7 +292,7 @@ def get_reservations_clinic(clinic_id, doctor_id):
     doctor = Doctor.query.filter_by(id=doctor_id).first()
     if doctor is None:
         return jsonify(Error="Doctor not found"), 404
-    reservations = Reservation.query.filter_by(id_doctor=doctor.id).all()
+    reservations = Reservation.query.filter_by(id_doctor=doctor.id, Reservation_Status.available).all()
     return jsonify([i.serialize() for i in reservations]), 200
 
 @api.route('/user/clinics/<int:clinic_id>/doctor/<int:doctor_id>/reservation/add', methods=['POST'])
