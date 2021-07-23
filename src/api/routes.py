@@ -429,7 +429,7 @@ def delete_doctor(id_doctor):
     db.session.commit()
     return jsonify(Success="Doctor deleted"), 203
 
-@api.routes('/clinic/reservations/<int:id_reservation>/change', methods=['PUT'])
+@api.route('/clinic/reservations/<int:id_reservation>/change', methods=['PUT'])
 @jwt_required()
 def change_reservation(id_reservation):
     current_user = get_jwt_identity()
