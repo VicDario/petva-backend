@@ -311,7 +311,7 @@ def add_reservation_clinic(clinic_id, doctor_id):
     if reservation is None:
         return jsonify(Error="Reservation not found"), 404
     reservation.id_user = user.id
-    reservation.state = Reservation_Status.reserved
+    reservation.status = Reservation_Status.reserved
     reservation.id_pet = request.json.get("id_pet")
     
     db.session.commit()
