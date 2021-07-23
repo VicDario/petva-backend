@@ -317,6 +317,29 @@ def add_reservation_clinic(clinic_id, doctor_id):
     db.session.commit()
     return jsonify(Success="Reservation added in clinic id: {}".format(clinic.id)), 201
 
+@api.route('/user/reservations', methods=['GET'])
+@jwt_required()
+def get_reservations_user():
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    return jsonify(user.serialize_reservations()), 200
+
+@api.route('/user/reservations/<int:id_reservation>/cancel', methods=['DELETE'])
+@jwt_required()
+def cancel_reservation(id_reservation):
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(email=current_user).first()
+    reservation = Reservation.query.filter_by(id=id_reservation).first()
+    if reservation is None:
+        return jsonify(Error="Reservation not found"), 404
+    if reservation.id_user != user.id:
+        return jsonify(Error="Not authorized"), 401
+    reservation.status = Reservation_Status.available
+    reservation.id_pet = None
+    reservation.id_user = None
+    db.session.commit()
+    return jsonify(Success="Reservation canceled"), 200
+
 #Clinic Routes
 
 @api.route('/clinic/register', methods=['POST']) #checked
