@@ -310,7 +310,7 @@ def add_reservation_clinic(clinic_id, doctor_id):
     reservation = Reservation.query.filter_by(id_doctor=doctor.id, id_clinic=clinic.id, id=id_reservation).first()
     if reservation is None:
         return jsonify(Error="Reservation not found"), 404
-    reservation.id_patient = user.id
+    reservation.id_user = user.id
     reservation.state = Reservation_Status.reserved
     reservation.id_pet = request.json.get("id_pet")
     
