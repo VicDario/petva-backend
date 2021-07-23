@@ -466,6 +466,14 @@ def login_doctor():
     else:
         return jsonify({"Error": "Bad username or password"}), 401
 
+@api.route('/doctor/info', methods=['GET'])
+@jwt_required()
+def info_doctor():
+    current_user = get_jwt_identity()
+    doctor = Doctor.query.filter_by(email=current_user).first()
+
+    return jsonify(doctor.serialize()), 200
+
 @api.route('/doctor/reservations/add', methods=['POST'])
 @jwt_required()
 def add_reservation_doctor():
