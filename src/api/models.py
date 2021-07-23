@@ -32,6 +32,8 @@ class User(db.Model):
     def serialize_pets(self):
         return list(map(lambda pet: pet.serialize(), self.pets))
 
+    def serialize_reservations(self):
+        return list(map(lambda reservation: reservation.serialize(), self.reservations))
 
 class Pet(db.Model):
     __tablename__ = 'pets'
@@ -117,6 +119,16 @@ class Pet(db.Model):
             'surgeries': self.history.serialize_surgeries()
         }
 
+    def serialize_for_reservation(self):
+        if self.specie == Specie.cat:
+            specie = 'cat'
+        if self.specie == Specie.dog:
+            specie = 'dog'
+        return {
+            'id': self.id,
+            'name': self.name,
+            'specie': specie,
+        }
 class History(db.Model):
     __tablename__ = 'histories'
     id = db.Column(db.Integer, primary_key=True)
@@ -247,14 +259,17 @@ class Reservation(db.Model):
     def serialize(self):
         if self.id_user is None:
             email = None
+            phone = None
         else:
             email = self.user.email
+            phone = self.user.phone
         if self.id_pet is None:
             pet = None
         else:
-            pet = self.pet.serialize()
+            pet = self.pet.serialize_for_reservation()
         return {
             'id': self.id,
+            'phone': phone,
             'id_clinic': self.id_clinic,
             'id_pet': self.id_pet,
             'date_start': self.date_start,
