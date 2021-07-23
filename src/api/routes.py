@@ -322,7 +322,8 @@ def add_reservation_clinic(clinic_id, doctor_id):
 def get_reservations_user():
     current_user = get_jwt_identity()
     user = User.query.filter_by(email=current_user).first()
-    return jsonify(user.serialize_reservations()), 200
+    reservations = Reservation.query.filter_by(id_user=user.id, status=Reservation_Status.reserved).all()
+    return jsonify([reservation.serialize() for reservation in reservations ]), 200
 
 @api.route('/user/reservations/<int:id_reservation>/cancel', methods=['DELETE'])
 @jwt_required()
@@ -334,9 +335,7 @@ def cancel_reservation(id_reservation):
         return jsonify(Error="Reservation not found"), 404
     if reservation.id_user != user.id:
         return jsonify(Error="Not authorized"), 401
-    reservation.status = Reservation_Status.available
-    reservation.id_pet = None
-    reservation.id_user = None
+    reservation.status = Reservation_Status.canceled
     db.session.commit()
     return jsonify(Success="Reservation canceled"), 200
 
@@ -429,6 +428,32 @@ def delete_doctor(id_doctor):
     db.session.delete(doctor)
     db.session.commit()
     return jsonify(Success="Doctor deleted"), 203
+
+@api.routes('/clinic/reservations/<int:id_reservation>/change', methods=['PUT'])
+@jwt_required()
+def change_reservation(id_reservation):
+    current_user = get_jwt_identity()
+    clinic = Clinic.query.filter_by(email=current_user).first()
+    reservation = Reservation.query.filter_by(id_clinic=clinic.id, id=id_reservation).first()
+    if reservation is None:
+        return jsonify(Error="Reservation not found"), 404
+    status = request.json.get('status')
+    if status is None:
+        return jsonify(Error="Bad status"), 400
+    if status == 'confirmed':
+        reservation.status = Reservation_Status.confirmed
+    elif status == 'canceled':
+        reservation.status = Reservation_Status.canceled
+    elif status == 'available':
+        reservation.status = Reservation_Status.available
+        reservation.id_pet = None
+        reservation.id_user = None
+    elif status == 'missed':
+        reservation.status = Reservation_Status.missed
+    
+    db.session.commit()
+    return jsonify(Success="Reservation status changed"), 200
+
 
 @api.route('/doctor/login', methods=['POST']) #checked
 def login_doctor():
