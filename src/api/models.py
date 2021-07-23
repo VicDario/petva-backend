@@ -271,7 +271,7 @@ class Reservation(db.Model):
         if self.status == Reservation_Status.available:
             status = 'available'
         elif self.status == Reservation_Status.reserved:
-            status = 'Reserved'
+            status = 'reserved'
         elif self.status == Reservation_Status.canceled:
             status = 'canceled'
         elif self.status == Reservation_Status.missed:
