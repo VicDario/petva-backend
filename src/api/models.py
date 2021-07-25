@@ -276,6 +276,8 @@ class Reservation(db.Model):
             status = 'canceled'
         elif self.status == Reservation_Status.missed:
             status = 'missed'
+        elif self.status == Reservation_Status.confirmed:
+            status = 'confirmed'
         return {
             'id': self.id,
             'phone': phone,
