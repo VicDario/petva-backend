@@ -292,7 +292,8 @@ class Reservation(db.Model):
             'email_customer': email,
             'doctor_name': self.doctor.name + ' ' + self.doctor.lastname,
             'info_pet': pet,
-            'status' : status
+            'status' : status,
+            'clinic_name': self.clinic.name
         }
 
 class Foundation(db.Model):

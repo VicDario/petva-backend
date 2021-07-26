@@ -25,6 +25,7 @@ def register_user():
     user.email = request.json.get('email')
     user.name = request.json.get('name')
     user.lastname = request.json.get('lastname')
+    user.phone = request.json.get('phone')
     user.password = generate_password_hash(request.json.get('password'))
 
     db.session.add(user)
@@ -427,7 +428,7 @@ def add_reservation_doctor():
 def get_hours_doctor():
     current_user = get_jwt_identity()
     doctor = Doctor.query.filter_by(email=current_user).first()
-    reservations = Reservation.query.filter_by(id_doctor=doctor).all()
+    reservations = Reservation.query.filter_by(id_doctor=doctor.id).all()
     return jsonify([i.serialize() for i in reservations]), 200
 
 @api.route('/doctor/reservations/<int:id_reservation>/change', methods=['PUT'])
