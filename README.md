@@ -193,7 +193,7 @@
 
         returns:    200 with the clinic info
 
-- `[PUT] /api/clinic/info` Modify clinic info.  // TODO Create this route
+- `[PUT] /api/clinic/info` Modify clinic info.
 
 - `[GET] /api/clinic/check/reserved` Get reservations.
 > Clinic must be logged.

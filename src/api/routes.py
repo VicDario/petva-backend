@@ -512,7 +512,7 @@ def delete_reservation_doctor(id_reservation):
 def get_reservations_doctor_reserved():
     current_user = get_jwt_identity()
     doctor = Doctor.query.filter_by(email=current_user).first()
-    reservations = Reservation.query.filter_by(id_doctor=doctor.id, state=Reservation_Status.reserved).all()
+    reservations = Reservation.query.filter_by(id_doctor=doctor.id, status=Reservation_Status.reserved).all()
     return jsonify([i.serialize for i in reservations]), 200
 
 #Foundation Routes
@@ -550,7 +550,7 @@ def info_foundation():
     current_user = get_jwt_identity()
     foundation = Foundation.query.filter_by(email=current_user).first()
 
-    return jsonify(foundation.serialize())
+    return jsonify(foundation.serialize()), 200
 
 @api.route('/foundation/info', methods=['PUT'])
 @jwt_required()
