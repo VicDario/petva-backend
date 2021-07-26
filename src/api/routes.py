@@ -513,7 +513,7 @@ def get_reservations_doctor_reserved():
     current_user = get_jwt_identity()
     doctor = Doctor.query.filter_by(email=current_user).first()
     reservations = Reservation.query.filter_by(id_doctor=doctor.id, status=Reservation_Status.reserved).all()
-    return jsonify([i.serialize for i in reservations]), 200
+    return jsonify([i.serialize() for i in reservations]), 200
 
 #Foundation Routes
 
