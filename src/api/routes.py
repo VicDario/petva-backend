@@ -25,6 +25,7 @@ def register_user():
     user.email = request.json.get('email')
     user.name = request.json.get('name')
     user.lastname = request.json.get('lastname')
+    user.phone = request.json.get('phone')
     user.password = generate_password_hash(request.json.get('password'))
 
     db.session.add(user)
