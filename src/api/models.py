@@ -5,7 +5,7 @@ db = SQLAlchemy()
 
 Specie = Enum('Specie', 'cat dog')
 Pet_state = Enum('Pet_State', 'adoption owned lost')
-Reservation_Status = Enum('Reservation_Status', 'available reserved canceled confirmed missed' )
+Reservation_Status = Enum('Reservation_Status', 'available reserved canceled confirmed missed finished' )
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -278,6 +278,8 @@ class Reservation(db.Model):
             status = 'missed'
         elif self.status == Reservation_Status.confirmed:
             status = 'confirmed'
+        elif self.status == Reservation_Status.finished:
+            status = 'finished'
         return {
             'id': self.id,
             'phone': phone,
