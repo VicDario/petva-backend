@@ -495,25 +495,38 @@ def add_reservation_doctor():
     print(reservation.serialize())
     return jsonify(Success="Reservation added"), 201
 
-@api.route('/doctor/reservations/<int:id_reservation>', methods=['DELETE'])
+@api.route('/doctor/reservations', methods=['GET'])
 @jwt_required()
-def delete_reservation_doctor(id_reservation):
+def get_hours_doctor():
+    current_user = get_jwt_identity()
+    doctor = Doctor.query.filter_by(email=current_user).first()
+    reservations = Reservation.query.filter_by(id_doctor=doctor).all()
+    return jsonify([i.serialize() for i in reservations]), 200
+
+@api.route('/doctor/reservations/<int:id_reservation>/change', methods=['PUT'])
+@jwt_required()
+def change_reservation_doctor(id_reservation):
     current_user = get_jwt_identity()
     doctor = Doctor.query.filter_by(email=current_user).first()
     reservation = Reservation.query.filter_by(id_doctor=doctor.id, id=id_reservation).first()
     if reservation is None:
         return jsonify(Error="Reservation not found"), 404
-    db.session.delete(reservation)
+    status = request.json.get('status')
+    if status is None:
+        return jsonify(Error="Bad status"), 400
+    if status == 'finished':
+        reservation.status = Reservation_Status.finished
+    elif status == 'canceled':
+        reservation.status = Reservation_Status.canceled
+    elif status == 'missed':
+        reservation.status = Reservation_Status.missed
+    elif status == 'available':
+        reservation.status = Reservation_Status.available
+        reservation.id_pet = None
+        reservation.id_user = None
+    
     db.session.commit()
-    return jsonify(Success="Reservation deleted"), 203
-
-@api.route('/doctor/reservations/reserved', methods=['GET'])
-@jwt_required()
-def get_reservations_doctor_reserved():
-    current_user = get_jwt_identity()
-    doctor = Doctor.query.filter_by(email=current_user).first()
-    reservations = Reservation.query.filter_by(id_doctor=doctor.id, status=Reservation_Status.reserved).all()
-    return jsonify([i.serialize() for i in reservations]), 200
+    return jsonify(Success="Reservation status changed"), 200
 
 #Foundation Routes
 
