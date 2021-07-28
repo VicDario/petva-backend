@@ -60,10 +60,14 @@ def update_user():
     user = User.query.filter_by(email=current_user).first()
     if user is None:
         return jsonify(Error="User not found"), 404
-    user.name = request.json.get('name')
-    user.lastname = request.json.get('lastname')
-    user.phone = request.json.get('phone')
-    user.email = request.json.get('email')
+    if request.json.get('name') is not None:
+        user.name = request.json.get('name')
+    if request.json.get('lastname') is not None:
+        user.lastname = request.json.get('lastname')
+    if request.json.get('phone') is not None:
+        user.phone = request.json.get('phone')
+    if request.json.get('email') is not None:
+        user.email = request.json.get('email')
     if request.json.get('picture') is not None:
         user.picture = request.json.get('picture')
     db.session.commit()
