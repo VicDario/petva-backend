@@ -589,10 +589,14 @@ def info_foundation():
 def update_foundation():
     current_user = get_jwt_identity()
     foundation = Foundation.query.filter_by(email=current_user).first()
-    foundation.name = request.json.get('name')
-    foundation.address = request.json.get('address')
-    foundation.phone = request.json.get('phone')
-    foundation.email = request.json.get('email')
+    if request.json.get('name') is not None:
+        foundation.name = request.json.get('name')
+    if request.json.get('address') is not None:
+        foundation.address = request.json.get('address')
+    if request.json.get('phone') is not None:
+        foundation.phone = request.json.get('phone')
+    if request.json.get('email') is not None:
+        foundation.email = request.json.get('email')
     if request.json.get('picture') is not None:
         foundation.picture = request.json.get('picture')
     if request.json.get('password') is not None:
