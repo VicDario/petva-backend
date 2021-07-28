@@ -677,9 +677,12 @@ def update_foundation_pet(pet_id):
     pet = Pet.query.filter_by(id_foundation=foundation.id, id=pet_id).first()
     if pet is None:
         return jsonify(Error="Pet not found"), 404
-    pet.name = request.json.get('name')
-    pet.code_chip = request.json.get('code_chip')
-    pet.breed = request.json.get('breed')
+    if request.json.get('name') is not None:
+        pet.name = request.json.get('name')
+    if request.json.get('code_chip') is not None:
+        pet.code_chip = request.json.get('code_chip')
+    if request.json.get('breed') is not None:
+        pet.breed = request.json.get('breed')
     if request.json.get('picture') is not None:
         pet.picture = request.json.get('picture')
     
