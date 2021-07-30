@@ -1,1 +1,11 @@
 .env
+src/database.db
+
+*.log
+*.sql
+*.sqlite
+*.db
+
+__pycache__/
+
+/app/
