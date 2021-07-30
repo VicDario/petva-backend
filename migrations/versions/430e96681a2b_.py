@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 36863a2187fa
+Revision ID: 430e96681a2b
 Revises: 
-Create Date: 2021-07-26 13:33:15.516983
+Create Date: 2021-07-29 22:15:34.268100
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '36863a2187fa'
+revision = '430e96681a2b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,7 +23,7 @@ def upgrade():
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('address', sa.Text(), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
-    sa.Column('password', sa.String(length=200), nullable=False),
+    sa.Column('password', sa.Text(), nullable=False),
     sa.Column('phone', sa.String(length=15), nullable=False),
     sa.Column('picture', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
@@ -34,7 +34,7 @@ def upgrade():
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('address', sa.Text(), nullable=False),
-    sa.Column('password', sa.String(length=200), nullable=False),
+    sa.Column('password', sa.Text(), nullable=False),
     sa.Column('phone', sa.String(length=15), nullable=False),
     sa.Column('picture', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
@@ -45,7 +45,7 @@ def upgrade():
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('lastname', sa.String(length=50), nullable=False),
-    sa.Column('password', sa.String(length=200), nullable=False),
+    sa.Column('password', sa.Text(), nullable=False),
     sa.Column('phone', sa.String(length=12), nullable=True),
     sa.Column('picture', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
@@ -57,7 +57,7 @@ def upgrade():
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('lastname', sa.String(length=100), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
-    sa.Column('password', sa.String(length=200), nullable=False),
+    sa.Column('password', sa.Text(), nullable=False),
     sa.Column('specialty', sa.String(length=50), nullable=False),
     sa.Column('picture', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['id_clinic'], ['clinics.id'], ondelete='CASCADE'),
