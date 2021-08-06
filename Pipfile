@@ -16,6 +16,7 @@ flask-swagger = "*"
 flask-cors = "*"
 flask-script = "*"
 psycopg2-binary = "*"
+flask-mail = "*"
 
 [dev-packages]
 
