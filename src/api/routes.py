@@ -1,11 +1,9 @@
-from flask import json, request, jsonify, url_for, Blueprint
-from sqlalchemy.orm import query
+from flask import json, request, jsonify, Blueprint
 from api.models import Reservation, Diagnostic, History, Surgery, Vaccine, db, User, Pet, Clinic, Doctor, Foundation, Specie, Pet_state, Reservation_Status
 from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta, datetime, timezone
-import uuid
 
 api = Blueprint('api', __name__)
 
