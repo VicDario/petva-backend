@@ -1,6 +1,5 @@
 from flask import json, request, jsonify, Blueprint
 from api.models import Reservation, Diagnostic, History, Surgery, Vaccine, db, User, Pet, Clinic, Doctor, Foundation, Specie, Pet_state, Reservation_Status
-from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta, datetime, timezone
@@ -270,55 +269,6 @@ def cancel_reservation(id_reservation):
     reservation.status = Reservation_Status.canceled
     db.session.commit()
     return jsonify(Success="Reservation canceled"), 200
-
-#Clinic Routes
-
-@api.route('/clinic/register', methods=['POST']) #checked
-def register_clinic():
-    if Clinic.query.filter_by(email=request.json.get("email")).first() is not None:
-        return jsonify(Error="Clinic already registered"), 409
-    clinic = Clinic()
-    clinic.email = request.json.get('email')
-    clinic.name = request.json.get('name')
-    clinic.address = request.json.get('address')
-    clinic.phone = request.json.get('phone')
-    clinic.password = generate_password_hash(request.json.get('password'))
-
-    db.session.add(clinic)
-    db.session.commit()
-
-    return jsonify(Success='Clinic created'), 201
-
-@api.route('/clinic/login', methods=['POST']) #checked
-def login_clinic():
-    email = request.json.get("email", None)
-    password = request.json.get("password", None)
-    clinic = Clinic.query.filter_by(email=email).first()        
-    if clinic is not None and check_password_hash(clinic.password, password):
-        access_token = create_access_token(identity=email, expires_delta=sessiontime)
-        return jsonify(access_token=access_token), 201
-    else:
-        return jsonify({"Error": "Bad username or password"}), 401
-
-@api.route('/clinic/info', methods=['GET'])
-@jwt_required()
-def info_clinic():
-    current_user = get_jwt_identity()
-    clinic = Clinic.query.filter_by(email=current_user).first()
-
-    return jsonify(clinic.serialize()), 200
-
-@api.route('/clinic/check/reservations', methods=['GET'])
-@jwt_required()
-def check_reserved_clinic():
-    current_user = get_jwt_identity()
-    clinic = Clinic.query.filter_by(email=current_user).first()
-    if clinic is None:
-        return jsonify(Error="Clinic not found"), 404
-    print(clinic.name)
-    reservations = Reservation.query.filter_by(id_clinic=clinic.id).all()
-    return jsonify([i.serialize() for i in reservations]), 200
-
 
 #Doctor Routes
 
