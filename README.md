@@ -5,6 +5,7 @@
   - Usar snake_case
 
   - Usar nombres en ingles
+  
 ## API endpoints
 - `[GET] /` is a Test endpoint
 ### User 
