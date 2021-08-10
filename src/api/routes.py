@@ -1,8 +1,7 @@
 from flask import json, request, jsonify, Blueprint
-from api.models import Reservation, Diagnostic, History, Surgery, Vaccine, db, User, Pet, Clinic, Doctor, Foundation, Specie, Pet_state, Reservation_Status
-from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from datetime import timedelta, datetime, timezone
+from api.models import Pet, Pet_state
+from flask_jwt_extended import jwt_required
+from datetime import timedelta
 
 api = Blueprint('api', __name__)
 
