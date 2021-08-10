@@ -1,7 +1,7 @@
 from flask import json, request, jsonify, Blueprint, render_template
 from api.models import Reservation, History, db, User, Pet, Clinic, Doctor, Specie, Pet_state, Reservation_Status
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta, datetime
 from services.mail_service import send_email
 from app import app
@@ -88,6 +88,17 @@ def forget_password():
 
     return jsonify(Success="Email sended"), 202
 
+@user.route('/reset', methods=['POST'])
+def reset_password():
+    token = request.json.get('token')
+    decode = decode_token(token)
+    email = decode['sub']
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        return jsonify(Error="User not found"), 404
+    user.password = generate_password_hash(request.json.get('password'))
+    db.session.commit()
+    return jsonify(Success="Password reset"), 202
 
 @user.route('/pets', methods=['GET'])
 @jwt_required()
