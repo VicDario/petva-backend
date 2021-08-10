@@ -29,9 +29,10 @@ from api.foundation import foundation
 from api.admin import setup_admin
 
 MIGRATE = Migrate(app, db)
+jwt = JWTManager(app)
 db.init_app(app)
 mail.init_app(app)
-jwt = JWTManager(app)
+jwt.init_app(app)
 
 # Allow CORS requests to this API
 CORS(app)
