@@ -1,12 +1,14 @@
-from flask import json, request, jsonify, Blueprint
+from flask import json, request, jsonify, Blueprint, render_template
 from api.models import Reservation, History, db, User, Pet, Clinic, Doctor, Specie, Pet_state, Reservation_Status
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta, datetime
+from services.mail_service import send_email
+from app import app
 
 user = Blueprint('api_user', __name__)
 
-sessiontime = timedelta(hours=1)
+sessiontime = timedelta(hours=3)
 
 @user.route('/register', methods=['POST'])
 def register_user():
@@ -66,6 +68,25 @@ def update_user():
         user.password = generate_password_hash(request.json.get('password'))
     
     return jsonify(Success="User updated"), 202
+
+@user.route('/forgot', methods=['POST'])
+def forget_password():
+    email = request.json.get('email')
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        return jsonify(Error="User not found"), 404
+
+    reset_token = create_access_token(identity=email, expires_delta=sessiontime)
+
+    url = 'https://petva-frontend.herokuapp.com/user/reset/'
+
+    send_email('Reset Your Password',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[user.email],
+                text_body=render_template('reset_password.txt', url=url + reset_token),
+                html_body=render_template('reset_password.html', url=url + reset_token))
+
+    return jsonify(Success="Email sended"), 202
 
 
 @user.route('/pets', methods=['GET'])
