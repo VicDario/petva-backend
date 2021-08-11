@@ -1,8 +1,10 @@
-from flask import json, request, jsonify, Blueprint
+from flask import json, request, jsonify, Blueprint, render_template
 from api.models import Vaccine, Diagnostic, Surgery, Foundation, History, db, User, Pet, Specie, Pet_state
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta, datetime
+from services.mail_service import send_email
+from app import app
 
 foundation = Blueprint('api_foundation', __name__)
 
@@ -62,6 +64,37 @@ def update_foundation():
         foundation.password = generate_password_hash(request.json.get('password'))
     db.session.commit()
     return jsonify(Success="Foundation updated"), 202
+
+@foundation.route('/forgot', methods=['POST'])
+def forget_password():
+    email = request.json.get('email')
+    foundation = Foundation.query.filter_by(email=email).first()
+    if foundation is None:
+        return jsonify(Error="Foundation not found"), 404
+
+    reset_token = create_access_token(identity=foundation.email, expires_delta=sessiontime)
+
+    url = 'https://petva-frontend.herokuapp.com/foundation/reset/'
+
+    send_email('Reset Your Password',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[foundation.email],
+                text_body=render_template('reset_password.txt', url=url + reset_token),
+                html_body=render_template('reset_password.html', url=url + reset_token))
+
+    return jsonify(Success="Email sended"), 202
+
+@foundation.route('/reset', methods=['POST'])
+def reset_password():
+    token = request.json.get('token')
+    decode = decode_token(token)
+    email = decode['sub']
+    foundation = Foundation.query.filter_by(email=email).first()
+    if foundation is None:
+        return jsonify(Error="Foundation not found"), 404
+    foundation.password = generate_password_hash(request.json.get('password'))
+    db.session.commit()
+    return jsonify(Success="Password reset"), 202
 
 @foundation.route('/pets/add', methods=['POST'])
 @jwt_required()
