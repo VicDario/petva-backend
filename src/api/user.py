@@ -76,7 +76,7 @@ def forget_password():
     if user is None:
         return jsonify(Error="User not found"), 404
 
-    reset_token = create_access_token(identity=email, expires_delta=sessiontime)
+    reset_token = create_access_token(identity=user.email, expires_delta=sessiontime)
 
     url = 'https://petva-frontend.herokuapp.com/user/reset/'
 
