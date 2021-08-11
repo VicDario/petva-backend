@@ -1,9 +1,10 @@
-from flask import json, request, jsonify, Blueprint
+from flask import json, request, jsonify, Blueprint, render_template
 from api.models import Reservation, db, Clinic, Doctor, Reservation_Status
-from api.utils import generate_sitemap, APIException
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta
+from services.mail_service import send_email
+from app import app
 
 clinic = Blueprint('api_clinic', __name__)
 
@@ -43,6 +44,37 @@ def info_clinic():
     clinic = Clinic.query.filter_by(email=current_user).first()
 
     return jsonify(clinic.serialize()), 200
+
+@clinic.route('/forgot', methods=['POST'])
+def forget_password():
+    email = request.json.get('email')
+    clinic = Clinic.query.filter_by(email=email).first()
+    if clinic is None:
+        return jsonify(Error="Clinic not found"), 404
+
+    reset_token = create_access_token(identity=clinic.email, expires_delta=sessiontime)
+
+    url = 'https://petva-frontend.herokuapp.com/clinic/reset/'
+
+    send_email('Reset Your Password',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[clinic.email],
+                text_body=render_template('reset_password.txt', url=url + reset_token),
+                html_body=render_template('reset_password.html', url=url + reset_token))
+
+    return jsonify(Success="Email sended"), 202
+
+@clinic.route('/reset', methods=['POST'])
+def reset_password():
+    token = request.json.get('token')
+    decode = decode_token(token)
+    email = decode['sub']
+    clinic = Clinic.query.filter_by(email=email).first()
+    if clinic is None:
+        return jsonify(Error="Clinic not found"), 404
+    clinic.password = generate_password_hash(request.json.get('password'))
+    db.session.commit()
+    return jsonify(Success="Password reset"), 202
 
 @clinic.route('/check/reservations', methods=['GET'])
 @jwt_required()
