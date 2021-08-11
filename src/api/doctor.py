@@ -1,8 +1,10 @@
-from flask import json, request, jsonify, Blueprint
+from flask import json, request, jsonify, Blueprint, render_template
 from api.models import Reservation, Diagnostic, History, Surgery, Vaccine, db, Pet, Clinic, Doctor, Reservation_Status
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from datetime import timedelta, datetime, timezone
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
+from datetime import timedelta, datetime
+from services.mail_service import send_email
+from app import app
 
 doctor = Blueprint('api_doctor', __name__)
 
@@ -26,6 +28,37 @@ def info_doctor():
     doctor = Doctor.query.filter_by(email=current_user).first()
 
     return jsonify(doctor.serialize()), 200
+
+@doctor.route('/forgot', methods=['POST'])
+def forget_password():
+    email = request.json.get('email')
+    doctor = Doctor.query.filter_by(email=email).first()
+    if doctor is None:
+        return jsonify(Error="Doctor not found"), 404
+
+    reset_token = create_access_token(identity=doctor.email, expires_delta=sessiontime)
+
+    url = 'https://petva-frontend.herokuapp.com/doctor/reset/'
+
+    send_email('Reset Your Password',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[doctor.email],
+                text_body=render_template('reset_password.txt', url=url + reset_token),
+                html_body=render_template('reset_password.html', url=url + reset_token))
+
+    return jsonify(Success="Email sended"), 202
+
+@doctor.route('/reset', methods=['POST'])
+def reset_password():
+    token = request.json.get('token')
+    decode = decode_token(token)
+    email = decode['sub']
+    doctor = Doctor.query.filter_by(email=email).first()
+    if doctor is None:
+        return jsonify(Error="Clinic not found"), 404
+    doctor.password = generate_password_hash(request.json.get('password'))
+    db.session.commit()
+    return jsonify(Success="Password reset"), 202
 
 @doctor.route('/reservations/add', methods=['POST'])
 @jwt_required()
