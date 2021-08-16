@@ -1,0 +1,6 @@
+Bienvenido
+    Por favor, confirma tu dirección de correo electrónico para poder registrarte en la plataforma.
+    Dale <a href="{{ url }}">click aqui.</a>
+    Alternativamente, puedes copiar el link en tu navegador:
+    {{ url }}
+PetVA Team
