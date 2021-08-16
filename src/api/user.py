@@ -1,4 +1,3 @@
-import os
 from flask import json, request, jsonify, Blueprint, render_template
 from api.models import Reservation, History, db, User, Pet, Clinic, Doctor, Specie, Pet_state, Reservation_Status
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -79,7 +78,7 @@ def forget_password():
 
     reset_token = create_access_token(identity=user.email, expires_delta=sessiontime)
     
-    url = os.getenv("URL_FRONTEND") + '/user/reset/'
+    url = app.config['URL_FRONTEND'] + '/user/reset/'
 
     send_email('Reset Your Password',
                 sender=app.config['MAIL_USERNAME'],
