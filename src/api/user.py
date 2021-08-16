@@ -51,8 +51,8 @@ def confirm_user():
     send_email('Bienvenido',
                 sender=app.config['MAIL_USERNAME'],
                 recipients=[user.email],
-                text_body=render_template('confirm_email.txt', url=url),
-                html_body=render_template('confirm_email.html', url=url))
+                text_body=render_template('new_user.txt', url=url),
+                html_body=render_template('new_user.html', url=url))
     return jsonify(Success='User confirmed'), 200
 
 
