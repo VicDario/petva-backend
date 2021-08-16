@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta, datetime
 from services.mail_service import send_email
+from services.token import generate_confirmation_token, confirm_token
 from app import app
 
 user = Blueprint('api_user', __name__)
@@ -21,16 +22,47 @@ def register_user():
     user.phone = request.json.get('phone')
     user.password = generate_password_hash(request.json.get('password'))
 
+    url = app.config['URL_FRONTEND'] + '/user/confirm/'
+    token = generate_confirmation_token(user.email)
+
+    send_email('Confirma tu correo electronico',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[user.email],
+                text_body=render_template('confirm_email.txt', url=url + token),
+                html_body=render_template('confirm_email.html', url=url + token))
+
     db.session.add(user)
     db.session.commit()
 
     return jsonify(Success='User created'), 201
 
+@user.route('/confirm', methods=['POST'])
+def confirm_user():
+    token = request.json.get('token')
+    email = confirm_token(token)
+    if email is False:
+        return jsonify(Error='Invalid token'), 409
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        return jsonify(Error='User not found'), 409
+    user.confirmed = True
+    db.session.commit()
+    url = app.config['URL_FRONTEND'] + '/user/login'
+    send_email('Bienvenido',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[user.email],
+                text_body=render_template('confirm_email.txt', url=url),
+                html_body=render_template('confirm_email.html', url=url))
+    return jsonify(Success='User confirmed'), 200
+
+
 @user.route('/login', methods=['POST'])
 def login_user():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-    user = User.query.filter_by(email=email).first()        
+    user = User.query.filter_by(email=email).first()
+    if user.confirmed is False:
+        return jsonify(Error='User not confirmed'), 409
     if user is not None and check_password_hash(user.password, password):
         access_token = create_access_token(identity=email, expires_delta=sessiontime)
         return jsonify(access_token=access_token), 201
@@ -76,7 +108,7 @@ def forget_password():
     if user is None:
         return jsonify(Error="User not found"), 404
 
-    reset_token = create_access_token(identity=user.email, expires_delta=sessiontime)
+    reset_token = generate_confirmation_token(user.email)
     
     url = app.config['URL_FRONTEND'] + '/user/reset/'
 
@@ -91,8 +123,9 @@ def forget_password():
 @user.route('/reset', methods=['POST'])
 def reset_password():
     token = request.json.get('token')
-    decode = decode_token(token)
-    email = decode['sub']
+    email = confirm_token(token)
+    if email is False:
+        return jsonify(Error='Invalid token'), 409
     user = User.query.filter_by(email=email).first()
     if user is None:
         return jsonify(Error="User not found"), 404
