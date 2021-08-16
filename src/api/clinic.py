@@ -1,3 +1,4 @@
+import os
 from flask import json, request, jsonify, Blueprint, render_template
 from api.models import Reservation, db, Clinic, Doctor, Reservation_Status
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -54,7 +55,7 @@ def forget_password():
 
     reset_token = create_access_token(identity=clinic.email, expires_delta=sessiontime)
 
-    url = 'https://petva-frontend.herokuapp.com/clinic/reset/'
+    url = os.getenv('URL_FRONTEND') + '/clinic/reset/'
 
     send_email('Reset Your Password',
                 sender=app.config['MAIL_USERNAME'],

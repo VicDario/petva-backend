@@ -1,3 +1,4 @@
+import os
 from flask import json, request, jsonify, Blueprint, render_template
 from api.models import Vaccine, Diagnostic, Surgery, Foundation, History, db, User, Pet, Specie, Pet_state
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -74,7 +75,7 @@ def forget_password():
 
     reset_token = create_access_token(identity=foundation.email, expires_delta=sessiontime)
 
-    url = 'https://petva-frontend.herokuapp.com/foundation/reset/'
+    url = os.getenv('URL_FRONTEND') + '/foundation/reset/'
 
     send_email('Reset Your Password',
                 sender=app.config['MAIL_USERNAME'],
