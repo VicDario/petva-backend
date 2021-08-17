@@ -23,7 +23,7 @@ def register_user():
     user.password = generate_password_hash(request.json.get('password'))
 
     url = app.config['URL_FRONTEND'] + '/user/confirm/'
-    token = generate_confirmation_token(user.email, 172800)
+    token = generate_confirmation_token(user.email)
 
     send_email('Confirma tu correo electronico',
                 sender=app.config['MAIL_USERNAME'],
@@ -39,7 +39,7 @@ def register_user():
 @user.route('/confirm', methods=['POST'])
 def confirm_user():
     token = request.json.get('token')
-    email = confirm_token(token)
+    email = confirm_token(token, 172800)
     if email is False:
         return jsonify(Error='Invalid token'), 409
     user = User.query.filter_by(email=email).first()
