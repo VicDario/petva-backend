@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta, datetime
 from services.mail_service import send_email
+from services.token import generate_confirmation_token, confirm_token
 from app import app
 
 foundation = Blueprint('api_foundation', __name__)
@@ -24,7 +25,36 @@ def register_foundation():
     db.session.add(foundation)
     db.session.commit()
 
+    url = app.config['URL_FRONTEND'] + '/foundation/confirm'
+    token = generate_confirmation_token(foundation.email)
+    send_email('Reset Your Password',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[foundation.email],
+                text_body=render_template('confirm_email_organization.txt', url=url + token),
+                html_body=render_template('confirm_email_organization.html', url=url + token))
+
     return jsonify(Success='Foundation created'), 201
+
+@foundation.route('/confirm', methods=['POST'])
+def confirm_foundation():
+    token = request.json.get('token')
+    email = confirm_token(token, 172800)
+    if email is False:
+        return jsonify(Error='Invalid token'), 409
+    foundation = Foundation.query.filter_by(email=email).first()
+    if foundation is None:
+        return jsonify(Error='Foundation not found'), 409
+
+    foundation.confirmed = True
+    db.session.commit()
+
+    send_email('Primer paso completado',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[foundation.email],
+                text_body=render_template('new_foundation_first_step.txt'),
+                html_body=render_template('new_foundation_first_step.html'))
+
+    return jsonify(Success='Clinic confirmed'), 200
 
 @foundation.route('/login', methods=['POST'])
 def login_foundation():

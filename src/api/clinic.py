@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta
 from services.mail_service import send_email
+from services.token import generate_confirmation_token, confirm_token
 from app import app
 
 clinic = Blueprint('api_clinic', __name__)
@@ -24,7 +25,37 @@ def register_clinic():
     db.session.add(clinic)
     db.session.commit()
 
+    url = app.config['URL_FRONTEND'] + '/clinic/confirm'
+    token = generate_confirmation_token(clinic.email)
+    send_email('Reset Your Password',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[clinic.email],
+                text_body=render_template('confirm_email_organization.txt', url=url + token),
+                html_body=render_template('confirm_email_organization.html', url=url + token))
+
     return jsonify(Success='Clinic created'), 201
+
+@clinic.route('/confirm')
+def confirm_clinic():
+    token = request.json.get('token')
+    email = confirm_token(token, 172800)
+    if email is False:
+        return jsonify(Error='Invalid token'), 409
+    clinic = Clinic.query.filter_by(email=email).first()
+    if clinic is None:
+        return jsonify(Error='Clinic not found'), 409
+
+    clinic.confirmed = True
+    db.session.commit()
+
+    send_email('Primer paso completado',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[clinic.email],
+                text_body=render_template('new_clinic_first_step.txt'),
+                html_body=render_template('new_clinic_first_step.html'))
+
+    return jsonify(Success='Clinic confirmed'), 200
+
 
 @clinic.route('/login', methods=['POST']) #checked
 def login_clinic():
