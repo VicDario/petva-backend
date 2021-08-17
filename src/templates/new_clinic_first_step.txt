@@ -1,0 +1,10 @@
+Bienvenido
+Gracias por confirmar tu correo.
+Por favor responde este correo con los siguientes documentos para verificar la identidad de tu clinica:
+
+    * RUT
+    * Patente
+
+Cuando tu identidad sea comprobada, te enviaremos un correo confirmando la autorizacion
+
+PetVA Team
