@@ -11,7 +11,7 @@ clinic = Blueprint('api_clinic', __name__)
 
 sessiontime = timedelta(hours=1)
 
-@clinic.route('/register', methods=['POST']) #checked
+@clinic.route('/register', methods=['POST'])
 def register_clinic():
     if Clinic.query.filter_by(email=request.json.get("email")).first() is not None:
         return jsonify(Error="Clinic already registered"), 409
@@ -35,7 +35,7 @@ def register_clinic():
 
     return jsonify(Success='Clinic created'), 201
 
-@clinic.route('/confirm')
+@clinic.route('/confirm', methods=['POST'])
 def confirm_clinic():
     token = request.json.get('token')
     email = confirm_token(token, 172800)
