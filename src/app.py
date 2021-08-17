@@ -26,7 +26,7 @@ from api.clinic import clinic
 from api.doctor import doctor
 from api.user import user
 from api.foundation import foundation
-from api.admin import setup_admin
+from api.admin import admin
 
 MIGRATE = Migrate(app, db)
 jwt = JWTManager(app)
@@ -37,10 +37,8 @@ jwt.init_app(app)
 # Allow CORS requests to this API
 CORS(app)
 
-# add the admin
-setup_admin(app)
-
 # Add all endpoints form the API with a "api" prefix
+app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(clinic, url_prefix='/api/clinic')
 app.register_blueprint(doctor, url_prefix='/api/doctor')

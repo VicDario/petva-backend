@@ -1,17 +1,14 @@
-  
-import os
-from flask_admin import Admin
-from .models import db, User
-from flask_admin.contrib.sqla import ModelView
+from flask import json, request, jsonify, Blueprint, render_template
+from api.models import Reservation, History, db, User, Pet, Clinic, Doctor, Specie, Pet_state, Reservation_Status
+from werkzeug.security import check_password_hash, generate_password_hash
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
+from datetime import timedelta, datetime
+from services.mail_service import send_email
+from services.token import generate_confirmation_token, confirm_token
+from app import app
 
-def setup_admin(app):
-    app.secret_key = os.environ.get('SECRET_KEY')
-    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-    admin = Admin(app, name='Admin', template_mode='bootstrap3')
+admin = Blueprint('api_admin', __name__)
 
-    
-    # Add your models here, for example this is how we add a the User model to the admin
-    admin.add_view(ModelView(User, db.session))
-
-    # You can duplicate that line to add mew models
-    # admin.add_view(ModelView(YourModelName, db.session))
+@admin.route('/login', methods=['POST'])
+def login():
+    pass
