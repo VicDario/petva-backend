@@ -25,7 +25,7 @@ def register_user():
     url = app.config['URL_FRONTEND'] + '/user/confirm/'
     token = generate_confirmation_token(user.email)
 
-    send_email('Confirma tu correo electronico',
+    send_email('Confirma tu correo electrónico',
                 sender=app.config['MAIL_USERNAME'],
                 recipients=[user.email],
                 text_body=render_template('confirm_email.txt', url=url + token),
@@ -112,7 +112,7 @@ def forget_password():
     
     url = app.config['URL_FRONTEND'] + '/user/reset/'
 
-    send_email('Reset Your Password',
+    send_email('Recuperación de contraseña',
                 sender=app.config['MAIL_USERNAME'],
                 recipients=[user.email],
                 text_body=render_template('reset_password.txt', url=url + reset_token),

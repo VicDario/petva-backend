@@ -27,7 +27,7 @@ def register_foundation():
 
     url = app.config['URL_FRONTEND'] + '/foundation/confirm'
     token = generate_confirmation_token(foundation.email)
-    send_email('Reset Your Password',
+    send_email('Confirma tu correo electrónico',
                 sender=app.config['MAIL_USERNAME'],
                 recipients=[foundation.email],
                 text_body=render_template('confirm_email_organization.txt', url=url + token),
@@ -106,7 +106,7 @@ def forget_password():
 
     url = app.config['URL_FRONTEND'] + '/foundation/reset/'
 
-    send_email('Reset Your Password',
+    send_email('Recuperación de contraseña',
                 sender=app.config['MAIL_USERNAME'],
                 recipients=[foundation.email],
                 text_body=render_template('reset_password.txt', url=url + reset_token),

@@ -25,9 +25,9 @@ def register_clinic():
     db.session.add(clinic)
     db.session.commit()
 
-    url = app.config['URL_FRONTEND'] + '/clinic/confirm'
+    url = app.config['URL_FRONTEND'] + '/clinic/confirm/'
     token = generate_confirmation_token(clinic.email)
-    send_email('Reset Your Password',
+    send_email('Confirma tu correo electrónico',
                 sender=app.config['MAIL_USERNAME'],
                 recipients=[clinic.email],
                 text_body=render_template('confirm_email_organization.txt', url=url + token),
@@ -87,7 +87,7 @@ def forget_password():
 
     url = app.config['URL_FRONTEND'] + '/clinic/reset/'
 
-    send_email('Reset Your Password',
+    send_email('Recuperación de contraseña',
                 sender=app.config['MAIL_USERNAME'],
                 recipients=[clinic.email],
                 text_body=render_template('reset_password.txt', url=url + reset_token),
