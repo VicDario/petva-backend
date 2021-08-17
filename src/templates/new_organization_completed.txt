@@ -1,0 +1,8 @@
+Bienvenido
+
+Tu identidad ha sido comprobada!
+
+Puedes iniciar sesión haciendo en el siguiente enlace :
+{{ url }}
+
+PetVA Team

@@ -1,5 +1,5 @@
 from flask import json, request, jsonify, Blueprint, render_template
-from api.models import db, User, Pet, Clinic, Doctor, Admin
+from api.models import Foundation, db, User, Pet, Clinic, Doctor, Admin
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from datetime import timedelta, datetime
@@ -69,3 +69,74 @@ def get_doctors(page = 1):
         return jsonify({'message': 'Invalid'}), 401
     doctors = Doctor.query.paginate(page=page, per_page=30)
     return jsonify([doctor.serialize() for doctor in doctors], doctors.pages, doctors.has_next, doctors.has_prev), 200
+
+@admin.route('/foundations', methods=['GET'])
+@admin.route('/foundations/<int:page>', methods=['GET'])
+@jwt_required()
+def get_foundations(page = 1):
+    current = get_jwt_identity()
+    admin = Admin.query.filter_by(email=current).first()
+    if admin is None:
+        return jsonify({'message': 'Invalid'}), 401
+    foundations = Foundation.query.paginate(page=page, per_page=30)
+    return jsonify([foundation.serialize() for foundation in foundations], foundations.pages, foundations.has_next, foundations.has_prev), 200
+
+@admin.route('/clinics/notauthorized', methods=['GET'])
+@jwt_required()
+def get_clinics_not_authorized():
+    current = get_jwt_identity()
+    admin = Admin.query.filter_by(email=current).first()
+    if admin is None:
+        return jsonify({'message': 'Invalid'}), 401
+    clinics = Clinic.query.filter_by(authorized=False).paginate(page=1, per_page=30)
+    return jsonify([clinic.serialize() for clinic in clinics], clinics.pages, clinics.has_next, clinics.has_prev), 200
+
+@admin.route('/foundations/notauthorized', methods=['GET'])
+@jwt_required()
+def get_foundations_not_authorized():
+    current = get_jwt_identity()
+    admin = Admin.query.filter_by(email=current).first()
+    if admin is None:
+        return jsonify({'message': 'Invalid'}), 401
+    foundations = Foundation.query.filter_by(authorized=False).paginate(page=1, per_page=30)
+    return jsonify([foundation.serialize() for foundation in foundations], foundations.pages, foundations.has_next, foundations.has_prev), 200
+
+@admin.route('/clinics/<int:id>/authorized', methods=['GET'])
+@jwt_required()
+def confirm_clinic(id):
+    current = get_jwt_identity()
+    admin = Admin.query.filter_by(email=current).first()
+    if admin is None:
+        return jsonify({'message': 'Invalid'}), 401
+    clinic = Clinic.query.filter_by(id=id).first()
+    if clinic is None:
+        return jsonify({'message': 'Invalid'}), 401
+    clinic.authorized = True
+    db.session.commit()
+    url = app.config['URL_FRONTEND'] + '/clinic/login'
+    send_email('Identidad comprobada',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[clinic.email],
+                text_body=render_template('new_organization_completed.txt', url=url),
+                html_body=render_template('new_organization_completed.html', url=url))
+    return jsonify({'message': 'Clinic confirmed'}), 200
+
+@admin.route('/foundations/<int:id>/authorized', methods=['GET'])
+@jwt_required()
+def confirm_foundations(id):
+    current = get_jwt_identity()
+    admin = Admin.query.filter_by(email=current).first()
+    if admin is None:
+        return jsonify({'message': 'Invalid'}), 401
+    clinic = Clinic.query.filter_by(id=id).first()
+    if clinic is None:
+        return jsonify({'message': 'Invalid'}), 401
+    clinic.authorized = True
+    db.session.commit()
+    url = app.config['URL_FRONTEND'] + '/foundation/login'
+    send_email('Identidad comprobada',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[clinic.email],
+                text_body=render_template('new_organization_completed.txt', url=url),
+                html_body=render_template('new_organization_completed.html', url=url))
+    return jsonify({'message': 'Clinic confirmed'}), 200
