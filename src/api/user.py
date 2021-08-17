@@ -23,7 +23,7 @@ def register_user():
     user.password = generate_password_hash(request.json.get('password'))
 
     url = app.config['URL_FRONTEND'] + '/user/confirm/'
-    token = generate_confirmation_token(user.email)
+    token = generate_confirmation_token(user.email, 172800)
 
     send_email('Confirma tu correo electronico',
                 sender=app.config['MAIL_USERNAME'],
