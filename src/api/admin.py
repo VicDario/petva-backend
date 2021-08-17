@@ -39,7 +39,7 @@ def register():
 
 @admin.route('/users', methods=['GET'])
 @admin.route('/users/<int:page>', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_users(page = 1):
     current = get_jwt_identity()
     admin = Admin.query.filter_by(email=current).first()
@@ -50,7 +50,7 @@ def get_users(page = 1):
 
 @admin.route('/clinics', methods=['GET'])
 @admin.route('/clinics/<int:page>', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_clinics(page = 1):
     current = get_jwt_identity()
     admin = Admin.query.filter_by(email=current).first()
@@ -61,7 +61,7 @@ def get_clinics(page = 1):
 
 @admin.route('/doctors', methods=['GET'])
 @admin.route('/doctors/<int:page>', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_doctors(page = 1):
     current = get_jwt_identity()
     admin = Admin.query.filter_by(email=current).first()
