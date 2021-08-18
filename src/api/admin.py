@@ -30,6 +30,7 @@ def register():
         password = request.json.get('password')
         admin = Admin()
         admin.email = email
+        admin.name = request.json.get('name')
         admin.password = generate_password_hash(password)
         db.session.add(admin)
         db.session.commit()
