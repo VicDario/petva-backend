@@ -62,6 +62,8 @@ def login_foundation():
     password = request.json.get("password", None)
     foundation = Foundation.query.filter_by(email=email).first()        
     if foundation is not None and check_password_hash(foundation.password, password):
+        if foundation.confirmed is False or foundation.authorized is False:
+            return jsonify(Error="Foundation not confirmed"), 409
         access_token = create_access_token(identity=email, expires_delta=sessiontime)
         return jsonify(access_token=access_token), 201
     else:

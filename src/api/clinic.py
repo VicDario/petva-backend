@@ -56,13 +56,14 @@ def confirm_clinic():
 
     return jsonify(Success='Clinic confirmed'), 200
 
-
 @clinic.route('/login', methods=['POST']) #checked
 def login_clinic():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
     clinic = Clinic.query.filter_by(email=email).first()        
     if clinic is not None and check_password_hash(clinic.password, password):
+        if clinic.confirmed is False or clinic.authorized is False:
+            return jsonify(Error="Clinic not authorized"), 409
         access_token = create_access_token(identity=email, expires_delta=sessiontime)
         return jsonify(access_token=access_token), 201
     else:
