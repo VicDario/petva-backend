@@ -25,7 +25,7 @@ def register_foundation():
     db.session.add(foundation)
     db.session.commit()
 
-    url = app.config['URL_FRONTEND'] + '/foundation/confirm'
+    url = app.config['URL_FRONTEND'] + '/foundation/confirm/'
     token = generate_confirmation_token(foundation.email)
     send_email('Confirma tu correo electrónico',
                 sender=app.config['MAIL_USERNAME'],
