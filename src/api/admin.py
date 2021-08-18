@@ -54,7 +54,7 @@ def get_users(page = 1):
     if admin is None:
         return jsonify({'message': 'Invalid'}), 401
     users = Pet.query.paginate(page=page, per_page=30)
-    return jsonify([user.serialize() for user in users], users.pages, users.has_next, users.has_prev), 200
+    return jsonify([user.serialize() for user in users.items], users.pages, users.has_next, users.has_prev), 200
 
 @admin.route('/clinics', methods=['GET'])
 @admin.route('/clinics/<int:page>', methods=['GET'])
@@ -65,7 +65,7 @@ def get_clinics(page = 1):
     if admin is None:
         return jsonify({'message': 'Invalid'}), 401
     clinics = Clinic.query.paginate(page=page, per_page=30)
-    return jsonify([clinic.serialize() for clinic in clinics], clinics.pages, clinics.has_next, clinics.has_prev), 200
+    return jsonify([clinic.serialize() for clinic in clinics.items], clinics.pages, clinics.has_next, clinics.has_prev), 200
 
 @admin.route('/doctors', methods=['GET'])
 @admin.route('/doctors/<int:page>', methods=['GET'])
@@ -76,7 +76,7 @@ def get_doctors(page = 1):
     if admin is None:
         return jsonify({'message': 'Invalid'}), 401
     doctors = Doctor.query.paginate(page=page, per_page=30)
-    return jsonify([doctor.serialize() for doctor in doctors], doctors.pages, doctors.has_next, doctors.has_prev), 200
+    return jsonify([doctor.serialize() for doctor in doctors.items], doctors.pages, doctors.has_next, doctors.has_prev), 200
 
 @admin.route('/foundations', methods=['GET'])
 @admin.route('/foundations/<int:page>', methods=['GET'])
@@ -87,7 +87,7 @@ def get_foundations(page = 1):
     if admin is None:
         return jsonify({'message': 'Invalid'}), 401
     foundations = Foundation.query.paginate(page=page, per_page=30)
-    return jsonify([foundation.serialize() for foundation in foundations], foundations.pages, foundations.has_next, foundations.has_prev), 200
+    return jsonify([foundation.serialize() for foundation in foundations.items], foundations.pages, foundations.has_next, foundations.has_prev), 200
 
 @admin.route('/clinics/notauthorized', methods=['GET'])
 @jwt_required()
