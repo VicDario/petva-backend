@@ -38,6 +38,13 @@ def register():
     else:
         return jsonify({'message': 'Invalid'}), 401
 
+@admin.route('/info', methods=[GET])
+@jwt_required()
+def info_user(): 
+    current_admin = get_jwt_identity()
+    admin = Admin.query.filter_by(email=current_admin).first()
+    return jsonify(admin.serialize()), 200
+
 @admin.route('/users', methods=['GET'])
 @admin.route('/users/<int:page>', methods=['GET'])
 @jwt_required()
