@@ -97,7 +97,7 @@ def get_clinics_not_authorized():
     if admin is None:
         return jsonify({'message': 'Invalid'}), 401
     clinics = Clinic.query.filter_by(authorized=False).paginate(page=1, per_page=30)
-    return jsonify([clinic.serialize() for clinic in clinics], clinics.pages, clinics.has_next, clinics.has_prev), 200
+    return jsonify([clinic.serialize() for clinic in clinics.items], clinics.pages, clinics.has_next, clinics.has_prev), 200
 
 @admin.route('/foundations/notauthorized', methods=['GET'])
 @jwt_required()
@@ -107,7 +107,7 @@ def get_foundations_not_authorized():
     if admin is None:
         return jsonify({'message': 'Invalid'}), 401
     foundations = Foundation.query.filter_by(authorized=False).paginate(page=1, per_page=30)
-    return jsonify([foundation.serialize() for foundation in foundations], foundations.pages, foundations.has_next, foundations.has_prev), 200
+    return jsonify([foundation.serialize() for foundation in foundations.items], foundations.pages, foundations.has_next, foundations.has_prev), 200
 
 @admin.route('/clinics/<int:id>/authorized', methods=['GET'])
 @jwt_required()
