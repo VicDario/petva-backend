@@ -1,0 +1,7 @@
+Bienvenido
+
+    Gracias por registrarte y confiar en nosotros.
+    Inicia sesión desde el siguiente link:
+    {{ url }}
+
+PetVA Team

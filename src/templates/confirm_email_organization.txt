@@ -1,0 +1,9 @@
+Bienvenido
+
+Primero deberas confirmas tu correo, luego tendras que enviar algunos documentos para acreditar tu identidad.
+
+Por favor, confirma tu dirección de correo electrónico para continuar el proceso de registro en la plataforma.
+
+{{ url }}
+
+PetVA Team

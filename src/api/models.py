@@ -16,6 +16,7 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     phone = db.Column(db.String(12))
     picture = db.Column(db.Text)
+    confirmed = db.Column(db.Boolean, default=False)
     pets = db.relationship('Pet', cascade='all, delete', backref='user')
     reservations = db.relationship('Reservation', cascade='all, delete', backref='user')
 
@@ -206,6 +207,8 @@ class Clinic(db.Model):
     password = db.Column(db.Text, nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     picture = db.Column(db.Text)
+    confirmed = db.Column(db.Boolean, default=False)
+    authorized = db.Column(db.Boolean, default=False)
     doctors = db.relationship('Doctor', cascade='all, delete', backref='clinic')
     reservations = db.relationship('Reservation', cascade='all, delete', backref='clinic')
     
@@ -305,6 +308,8 @@ class Foundation(db.Model):
     password = db.Column(db.Text, nullable=False)
     phone = db.Column(db.String(15), nullable=False)
     picture = db.Column(db.Text)
+    confirmed = db.Column(db.Boolean, default=False)
+    authorized = db.Column(db.Boolean, default=False)
     pets = db.relationship('Pet', backref='foundation')
 
     def serialize(self):
@@ -319,3 +324,17 @@ class Foundation(db.Model):
 
     def serialize_pets(self):
         return list(map(lambda pet: pet.serialize(), self.pets))
+
+class Admin(db.Model):
+    __tablename__ = 'admins'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.Text, nullable=False)
+    
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email
+        }

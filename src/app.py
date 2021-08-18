@@ -4,38 +4,46 @@ from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
 from api.utils import APIException, generate_sitemap
-from api.models import db
-from api.routes import api
-from api.admin import setup_admin
+from config import DevelopmentConfig, ProductionConfig
 
 ENV = os.getenv("FLASK_ENV")
 static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../public/')
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+mail = Mail(app)
 
 # database configuration
-if os.getenv("DATABASE_URL") is not None:
-    uri = os.getenv("DATABASE_URL")
-    if uri.startswith("postgres://"):
-        uri = uri.replace("postgres://", "postgresql://", 1)
-    app.config['SQLALCHEMY_DATABASE_URI'] = uri
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
+if ENV == "development":
+    app.config.from_object(DevelopmentConfig)
+elif ENV == "production":
+    app.config.from_object(ProductionConfig)
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+from api.models import db
+from api.routes import api
+from api.clinic import clinic
+from api.doctor import doctor
+from api.user import user
+from api.foundation import foundation
+from api.admin import admin
+
 MIGRATE = Migrate(app, db)
-db.init_app(app)
 jwt = JWTManager(app)
+db.init_app(app)
+mail.init_app(app)
+jwt.init_app(app)
 
 # Allow CORS requests to this API
 CORS(app)
 
-# add the admin
-setup_admin(app)
-
 # Add all endpoints form the API with a "api" prefix
+app.register_blueprint(admin, url_prefix='/admin')
 app.register_blueprint(api, url_prefix='/api')
+app.register_blueprint(clinic, url_prefix='/api/clinic')
+app.register_blueprint(doctor, url_prefix='/api/doctor')
+app.register_blueprint(user, url_prefix='/api/user')
+app.register_blueprint(foundation, url_prefix='/api/foundation')
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)

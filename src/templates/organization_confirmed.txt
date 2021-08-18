@@ -1,0 +1,8 @@
+Tu identidad ha sido comprobada!
+Gracias por registrarte en PetVA!
+Estamos encantados de que ahora formes parte de nosotros.
+Puedes iniciar sesión en:
+
+{{ url }}
+
+PetVA Team
