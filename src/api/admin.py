@@ -136,15 +136,15 @@ def confirm_foundations(id):
     admin = Admin.query.filter_by(email=current).first()
     if admin is None:
         return jsonify({'message': 'Invalid'}), 401
-    clinic = Clinic.query.filter_by(id=id).first()
-    if clinic is None:
+    foundation = Foundation.query.filter_by(id=id).first()
+    if foundation is None:
         return jsonify({'message': 'Invalid'}), 401
-    clinic.authorized = True
+    foundation.authorized = True
     db.session.commit()
     url = app.config['URL_FRONTEND'] + '/foundation/login'
     send_email('Identidad comprobada',
                 sender=app.config['MAIL_USERNAME'],
-                recipients=[clinic.email],
+                recipients=[foundation.email],
                 text_body=render_template('new_organization_completed.txt', url=url),
                 html_body=render_template('new_organization_completed.html', url=url))
-    return jsonify({'message': 'Clinic confirmed'}), 200
+    return jsonify({'message': 'Foundation confirmed'}), 200
